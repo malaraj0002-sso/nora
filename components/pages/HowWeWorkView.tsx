@@ -24,7 +24,7 @@ export function HowWeWorkView({ locale, content }: { locale: AppLocale; content:
               <div className="group relative flex flex-col justify-between h-full overflow-hidden rounded-2xl border border-gold-200/50 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-gold-400 hover:shadow-2xl hover:shadow-gold-500/15">
                 
                 {/* رقم الخطوة الخلفي العملاق الشفاف */}
-                <span className="absolute -left-2 -top-2 text-7xl font-extrabold text-gold-500/10 transition-colors duration-500 group-hover:text-gold-500/20 select-none">
+                <span className="pointer-events-none absolute -start-2 -top-2 select-none text-7xl font-extrabold leading-none text-gold-500/10 transition-colors duration-500 group-hover:text-gold-500/20">
                   {step.number}
                 </span>
 
@@ -38,7 +38,7 @@ export function HowWeWorkView({ locale, content }: { locale: AppLocale; content:
                   </div>
 
                   {/* عنوان الخطوة والوصف */}
-                  <h3 className="text-xl font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
+                  <h3 className="text-xl font-bold leading-snug text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
                     {t(step.title, locale)}
                   </h3>
 

@@ -19,6 +19,7 @@ export function ProjectsView({ locale, content }: { locale: AppLocale; content: 
         <div className="container-luxury">
           <ProjectsGrid
             labels={content.categoryLabels[locale]}
+            viewProjectLabel={content.nav[locale].viewProject}
             projects={visible.map((p) => ({
               slug: p.slug,
               title: t(p.title, locale),

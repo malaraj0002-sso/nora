@@ -81,7 +81,7 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
               return (
                 <Reveal key={i} delay={i * 80}>
                   <div className="group relative h-full overflow-hidden rounded-2xl border border-gold-300/40 bg-gradient-to-br from-white via-white to-warm-100/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-gold-400 hover:shadow-2xl hover:shadow-gold-500/15">
-                    <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gold-400/10 blur-xl transition-all duration-500 group-hover:bg-gold-400/25" />
+                    <div className="absolute -end-8 -top-8 h-28 w-28 rounded-full bg-gold-400/10 blur-xl transition-all duration-500 group-hover:bg-gold-400/25" />
 
                     <div className="relative mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-gold-300/50 bg-gradient-to-tr from-gold-100/80 to-gold-50 text-gold-600 shadow-inner transition-all duration-300 group-hover:scale-110 group-hover:border-gold-500 group-hover:bg-gradient-to-tr group-hover:from-gold-500 group-hover:to-gold-400 group-hover:text-white group-hover:shadow-lg group-hover:shadow-gold-500/30">
                       <Icon className="h-7 w-7 transition-transform duration-300 group-hover:rotate-6" />
@@ -132,18 +132,18 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
                       
                       <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/80 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
 
-                      <div className="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/80 text-gold-600 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-white shadow-lg">
+                      <div className="absolute top-4 end-4 z-10 flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/80 text-gold-600 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-white">
                         <Icon className="h-5 w-5" />
                       </div>
                     </div>
 
                     <div className="p-6">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-xl font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
+                        <h3 className="min-w-0 flex-1 text-xl font-bold leading-snug text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
                           {t(s.title, locale)}
                         </h3>
                         
-                        <div className="flex h-8 w-8 -translate-x-2 items-center justify-center rounded-full bg-gold-50 text-gold-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 rtl:translate-x-2 rtl:group-hover:translate-x-0">
+                        <div className="flex h-8 w-8 shrink-0 -translate-x-2 items-center justify-center rounded-full bg-gold-50 text-gold-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 rtl:translate-x-2 rtl:group-hover:translate-x-0">
                           <ArrowLeft className="h-4 w-4 rtl:rotate-0 rotate-180" />
                         </div>
                       </div>
@@ -197,18 +197,18 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
 
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/90 via-charcoal-950/40 to-transparent transition-opacity duration-300 group-hover:from-charcoal-950/95" />
 
-                  <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-charcoal-950">
+                  <div className="absolute top-4 start-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-charcoal-950">
                     <Eye className="h-5 w-5" />
                   </div>
 
                   <div className="absolute inset-x-0 bottom-0 z-10 p-6">
-                    <div className="mb-2 inline-block rounded-full bg-gold-400/20 px-3 py-1 border border-gold-400/40 backdrop-blur-md">
-                      <span className="text-xs font-semibold text-gold-300 uppercase tracking-wider">
+                    <div className="mb-2 inline-block max-w-full rounded-full border border-gold-400/40 bg-gold-400/20 px-3 py-1 backdrop-blur-md">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-gold-300 rtl:tracking-wide">
                         {content.categoryLabels[locale][p.category]}
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white transition-colors duration-300 group-hover:text-gold-300">
+                    <h3 className="text-xl font-bold leading-snug text-white transition-colors duration-300 group-hover:text-gold-300">
                       {t(p.title, locale)}
                     </h3>
 
@@ -237,7 +237,7 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
         <div className="container-luxury text-center">
           <Reveal>
             <div className="mx-auto mb-12 max-w-2xl">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-gold-400 sm:text-sm">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-gold-400 rtl:tracking-wide sm:text-sm">
                 {t(home.whyEyebrow, locale)}
               </p>
               <h2 className="text-3xl font-extrabold text-warm-50 sm:text-4xl lg:text-5xl">
@@ -254,14 +254,14 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
               const Icon = whyIcons[i % whyIcons.length];
               return (
                 <Reveal key={i} delay={i * 60}>
-                  <div className="group relative h-full overflow-hidden rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-7 text-right transition-all duration-300 hover:-translate-y-2 hover:border-gold-400/50 hover:bg-charcoal-800/80 hover:shadow-2xl hover:shadow-gold-500/10">
-                    <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold-400/5 blur-2xl transition-all duration-500 group-hover:bg-gold-400/20" />
+                  <div className="group relative h-full overflow-hidden rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-7 text-start transition-all duration-300 hover:-translate-y-2 hover:border-gold-400/50 hover:bg-charcoal-800/80 hover:shadow-2xl hover:shadow-gold-500/10">
+                    <div className="absolute -end-10 -top-10 h-32 w-32 rounded-full bg-gold-400/5 blur-2xl transition-all duration-500 group-hover:bg-gold-400/20" />
 
                     <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gold-400/10 text-gold-400 transition-transform duration-300 group-hover:scale-110 group-hover:bg-gold-400 group-hover:text-charcoal-950">
                       <Icon className="h-7 w-7" />
                     </div>
 
-                    <h3 className="text-xl font-bold text-warm-50 transition-colors duration-300 group-hover:text-gold-300 sm:text-2xl">
+                    <h3 className="text-xl font-bold leading-snug text-warm-50 transition-colors duration-300 group-hover:text-gold-300 sm:text-2xl">
                       {t(item.title, locale)}
                     </h3>
 
@@ -289,9 +289,9 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             {content.howWeWork.steps.map((step, i) => (
               <Reveal key={step.number} delay={i * 40}>
-                <div className="rounded-2xl bg-warm-50 p-4 text-center border border-gold-200/30 transition-all hover:border-gold-400 hover:shadow-md">
+                <div className="h-full rounded-2xl border border-gold-200/30 bg-warm-50 p-4 text-center transition-all hover:border-gold-400 hover:shadow-md">
                   <p className="text-sm font-bold text-gold-500">{step.number}</p>
-                  <h3 className="mt-2 text-sm font-semibold">{t(step.title, locale)}</h3>
+                  <h3 className="mt-2 text-sm font-semibold leading-snug">{t(step.title, locale)}</h3>
                 </div>
               </Reveal>
             ))}
@@ -328,13 +328,13 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
                     <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/90 via-charcoal-950/30 to-transparent transition-opacity duration-300 group-hover:from-charcoal-950/95" />
 
                     {/* أيقونة أعلى البطاقة */}
-                    <div className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-charcoal-950">
+                    <div className="absolute top-4 start-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-gold-400 group-hover:bg-gold-500 group-hover:text-charcoal-950">
                       <Layers3 className="h-5 w-5" />
                     </div>
 
                     {/* عنوان ووصف الخامة مدمجان فوق الصورة */}
                     <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-center">
-                      <h3 className="text-xl font-bold text-white transition-colors duration-300 group-hover:text-gold-300">
+                      <h3 className="text-xl font-bold leading-snug text-white transition-colors duration-300 group-hover:text-gold-300">
                         {t(m.name, locale)}
                       </h3>
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-warm-100/80 transition-opacity duration-300 group-hover:text-white">
@@ -391,7 +391,7 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
             <p className="mx-auto mt-4 max-w-2xl text-warm-50/70">{t(home.ctaSubtitle, locale)}</p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn-whatsapp">
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="h-5 w-5 shrink-0" />
                 {nav.whatsapp}
               </a>
             </div>

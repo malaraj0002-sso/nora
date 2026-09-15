@@ -5,6 +5,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import { mediaSrc } from '@/lib/content/media';
 import type { SiteContent } from '@/lib/content/types';
+import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function MaterialsView({ locale, content }: { locale: AppLocale; content: SiteContent }) {
@@ -39,9 +40,9 @@ export function MaterialsView({ locale, content }: { locale: AppLocale; content:
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/70 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
 
                   {/* وسام جودة الخامة */}
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-md">
-                    <Sparkles className="h-3 w-3 text-gold-400" />
-                    <span>{locale === 'ar' ? 'خامة فاخرة' : 'Premium Material'}</span>
+                  <div className="absolute top-3 end-3 z-10 flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[11px] font-medium leading-snug text-white backdrop-blur-md">
+                    <Sparkles className="h-3 w-3 shrink-0 text-gold-400" />
+                    <span className="min-w-0">{t(INTERFACE_COPY.premiumMaterial, locale)}</span>
                   </div>
                 </div>
 
@@ -50,12 +51,12 @@ export function MaterialsView({ locale, content }: { locale: AppLocale; content:
                   <div>
                     <div className="flex items-center gap-1.5 text-gold-600 mb-1.5">
                       <Layers className="h-4 w-4" />
-                      <span className="text-xs font-semibold tracking-wider uppercase">
-                        {locale === 'ar' ? 'جودة المواصفات' : 'Wood Specs'}
+                      <span className="text-xs font-semibold uppercase tracking-wider rtl:tracking-wide">
+                        {t(INTERFACE_COPY.materialSpecs, locale)}
                       </span>
                     </div>
 
-                    <h2 className="text-xl font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
+                    <h2 className="text-xl font-bold leading-snug text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
                       {t(m.name, locale)}
                     </h2>
 

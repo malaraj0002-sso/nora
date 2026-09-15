@@ -43,7 +43,7 @@ export function Footer() {
       <div className="border-b border-charcoal-800/80 relative z-10">
         <div className="container-luxury flex flex-col items-start justify-between gap-6 py-12 sm:py-16 lg:flex-row lg:items-center">
           <div>
-            <h2 className="text-2xl font-bold sm:text-3xl lg:text-4xl text-white tracking-wide">
+            <h2 className="max-w-3xl text-2xl font-bold leading-snug text-white sm:text-3xl lg:text-4xl">
               {ui.footerCta}
             </h2>
             <p className="mt-2 text-base text-warm-50/70 sm:text-lg font-light">
@@ -80,17 +80,17 @@ export function Footer() {
             {ui.footerTagline}
           </p>
           {settings.pillars && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/10 px-3 py-1 text-xs font-semibold text-gold-300">
-              <Sparkles className="h-3 w-3 text-gold-400" />
-              <span>{t(settings.pillars, locale)}</span>
+            <div className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/10 px-3 py-1 text-xs font-semibold leading-snug text-gold-300">
+              <Sparkles className="h-3 w-3 shrink-0 text-gold-400" />
+              <span className="min-w-0">{t(settings.pillars, locale)}</span>
             </div>
           )}
         </div>
 
         {/* العمود الثاني: الخدمات */}
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold-400 rtl:tracking-wide">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />
             {ui.servicesTitle}
           </h3>
           <ul className="space-y-2.5">
@@ -98,7 +98,7 @@ export function Footer() {
               <li key={s.slug}>
                 <Link
                   href={`/services/${s.slug}`}
-                  className="text-sm text-warm-50/60 transition-colors duration-300 hover:text-gold-300"
+                  className="inline-block max-w-full break-words text-sm text-warm-50/60 transition-colors duration-300 hover:text-gold-300"
                 >
                   {s.title}
                 </Link>
@@ -109,8 +109,8 @@ export function Footer() {
 
         {/* العمود الثالث: روابط التنقل الفعالة */}
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold-400 rtl:tracking-wide">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />
             {ui.navTitle}
           </h3>
           <ul className="space-y-2.5">
@@ -118,7 +118,7 @@ export function Footer() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-sm text-warm-50/60 transition-colors duration-300 hover:text-gold-300"
+                  className="inline-block max-w-full break-words text-sm text-warm-50/60 transition-colors duration-300 hover:text-gold-300"
                 >
                   {link.label}
                 </Link>
@@ -129,8 +129,8 @@ export function Footer() {
 
         {/* العمود الرابع: التواصل، الـ QR Code، ومبدل اللغات */}
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold-400 rtl:tracking-wide">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />
             {ui.contactTitle}
           </h3>
           
@@ -165,7 +165,7 @@ export function Footer() {
               <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-gold-500/20 bg-gold-500/10 text-gold-400 shrink-0 mt-0.5">
                 <MapPin className="h-3.5 w-3.5" />
               </div>
-              <span className="leading-relaxed">{t(settings.address, locale)}</span>
+              <span className="min-w-0 leading-relaxed">{t(settings.address, locale)}</span>
             </li>
           </ul>
 
@@ -233,7 +233,7 @@ export function Footer() {
             href={LAZACORE.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gradient-to-r from-gold-500/15 via-gold-400/5 to-transparent px-4 py-1.5 shadow-sm transition-all duration-500 hover:border-gold-400 hover:bg-gold-500/20 hover:shadow-lg hover:shadow-gold-500/20 active:scale-95"
+            className="group relative inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-gold-500/40 bg-gradient-to-r from-gold-500/15 via-gold-400/5 to-transparent px-4 py-1.5 shadow-sm transition-all duration-500 hover:border-gold-400 hover:bg-gold-500/20 hover:shadow-lg hover:shadow-gold-500/20 active:scale-95"
           >
             <span className="text-warm-50/70 transition-colors duration-300 group-hover:text-warm-50">
               {ui.madeBy}

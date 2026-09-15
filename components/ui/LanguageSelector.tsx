@@ -26,7 +26,7 @@ export function LanguageSelector({ light = false }: { light?: boolean }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex min-h-11 min-w-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+        className={`inline-flex min-h-11 min-w-11 items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium leading-snug transition-colors sm:px-3 ${
           light
             ? 'text-warm-50/90 hover:bg-white/10 hover:text-warm-50'
             : 'text-charcoal-700 hover:bg-charcoal-100'
@@ -47,10 +47,10 @@ export function LanguageSelector({ light = false }: { light?: boolean }) {
                 router.replace(pathname, { locale: code });
                 setOpen(false);
               }}
-              className="flex w-full items-center justify-between px-4 py-2.5 text-sm text-charcoal-800 hover:bg-warm-100"
+              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-start text-sm leading-snug text-charcoal-800 hover:bg-warm-100"
             >
               <span>{LOCALE_META[code].label}</span>
-              {locale === code && <Check className="h-4 w-4 text-gold-500" />}
+              {locale === code && <Check className="h-4 w-4 shrink-0 text-gold-500" />}
             </button>
           ))}
         </div>

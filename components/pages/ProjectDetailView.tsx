@@ -6,6 +6,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import { mediaSrc } from '@/lib/content/media';
 import type { SiteContent } from '@/lib/content/types';
+import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function ProjectDetailView({
@@ -65,8 +66,8 @@ export function ProjectDetailView({
               <div className="rounded-2xl border border-gold-200/60 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 text-gold-600 mb-4">
                   <Layers className="h-4 w-4" />
-                  <span className="text-xs font-semibold tracking-wider uppercase">
-                    {locale === 'ar' ? 'المواد والخامات المستخدمة' : 'Materials Used'}
+                  <span className="text-xs font-semibold uppercase tracking-wider rtl:tracking-wide">
+                    {t(INTERFACE_COPY.materialsUsed, locale)}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
@@ -89,10 +90,10 @@ export function ProjectDetailView({
             <Reveal delay={150}>
               <div className="pt-8 border-t border-gold-200/60">
                 <div className="mb-8">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gold-600">
-                    {locale === 'ar' ? 'استكشف المزيد' : 'Explore More'}
+                  <span className="text-xs font-semibold uppercase tracking-wider text-gold-600 rtl:tracking-wide">
+                    {t(INTERFACE_COPY.exploreMore, locale)}
                   </span>
-                  <h2 className="text-2xl font-bold text-charcoal-900 mt-1">
+                  <h2 className="mt-1 text-2xl font-bold leading-snug text-charcoal-900">
                     {content.ui[locale].relatedProjects}
                   </h2>
                 </div>
@@ -114,7 +115,7 @@ export function ProjectDetailView({
                             sizes="(max-width: 640px) 100vw, 33vw"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/70 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
-                          <div className="absolute bottom-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-hover:border-gold-400">
+                          <div className="absolute bottom-3 start-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-gold-400 group-hover:bg-gold-500">
                             <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45" />
                           </div>
                         </div>
@@ -123,8 +124,8 @@ export function ProjectDetailView({
                             {t(p.title, locale)}
                           </h3>
                           <div className="mt-4 flex items-center text-xs font-semibold text-gold-600 transition-all duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
-                            <span>{locale === 'ar' ? 'عرض المشروع' : 'View Project'}</span>
-                            <ArrowRight className="mr-1.5 h-3.5 w-3.5 rotate-180 rtl:rotate-0" />
+                            <span>{content.nav[locale].viewProject}</span>
+                            <ArrowRight className="me-1.5 h-3.5 w-3.5 rotate-180 rtl:rotate-0" />
                           </div>
                         </div>
                         <div className="h-1 w-0 bg-gradient-to-r from-gold-400 to-gold-600 transition-all duration-500 group-hover:w-full" />

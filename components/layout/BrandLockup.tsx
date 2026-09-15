@@ -47,7 +47,7 @@ export function BrandLockup({
 
       {/* التحكم بحجم وتنسيق الاسم المكتوب بجانب اللوجو */}
       <span
-        className={`text-xl font-bold tracking-tight sm:text-2xl ${textClass}`}
+        className={`hidden min-[380px]:inline text-xl font-bold leading-tight tracking-tight sm:text-2xl ${textClass}`}
       >
         {brandName}
       </span>

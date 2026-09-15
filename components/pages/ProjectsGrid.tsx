@@ -19,9 +19,11 @@ export type ProjectCard = {
 export function ProjectsGrid({
   labels,
   projects,
+  viewProjectLabel,
 }: {
   labels: Record<ProjectCategory | 'all', string>;
   projects: ProjectCard[];
+  viewProjectLabel: string;
 }) {
   const [filter, setFilter] = useState<ProjectCategory | 'all'>('all');
   
@@ -41,7 +43,7 @@ export function ProjectsGrid({
             key={cat}
             type="button"
             onClick={() => setFilter(cat)}
-            className={`min-h-11 rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 ${
+            className={`min-h-11 max-w-full rounded-full px-5 py-2.5 text-sm font-medium leading-snug transition-all duration-300 sm:px-6 ${
               filter === cat
                 ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/25 scale-105'
                 : 'bg-white text-charcoal-700 border border-gold-200/60 hover:border-gold-400 hover:text-gold-600'
@@ -75,13 +77,13 @@ export function ProjectsGrid({
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/80 via-charcoal-950/20 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
 
                 {/* وسام اسم القسم */}
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur-md">
-                  <Sparkles className="h-3 w-3 text-gold-400" />
-                  <span>{labels[p.category]}</span>
+                <div className="absolute top-4 end-4 z-10 flex max-w-[calc(100%-2rem)] items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-3.5 py-1.5 text-xs font-medium leading-snug text-white backdrop-blur-md">
+                  <Sparkles className="h-3 w-3 shrink-0 text-gold-400" />
+                  <span className="min-w-0">{labels[p.category]}</span>
                 </div>
 
                 {/* زر الفتح العائم */}
-                <div className="absolute bottom-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-hover:border-gold-400 shadow-md">
+                <div className="absolute bottom-4 start-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white shadow-md backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-gold-400 group-hover:bg-gold-500">
                   <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:rotate-45" />
                 </div>
               </div>
@@ -89,7 +91,7 @@ export function ProjectsGrid({
               {/* تفاصيل المشروع */}
               <div className="flex flex-col justify-between flex-1 p-6">
                 <div>
-                  <h3 className="text-xl font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
+                  <h3 className="text-xl font-bold leading-snug text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
                     {p.title}
                   </h3>
 
@@ -102,8 +104,8 @@ export function ProjectsGrid({
 
                 {/* زر الذهاب بالتفاصيل */}
                 <div className="mt-6 flex items-center text-sm font-semibold text-gold-600 transition-all duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
-                  <span>عرض التفاصيل</span>
-                  <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-0 rotate-180 transition-transform duration-300 group-hover:-translate-x-1 rtl:group-hover:translate-x-1" />
+                  <span>{viewProjectLabel}</span>
+                  <ArrowLeft className="me-2 h-4 w-4 rotate-180 transition-transform duration-300 group-hover:-translate-x-1 rtl:rotate-0 rtl:group-hover:translate-x-1" />
                 </div>
               </div>
 

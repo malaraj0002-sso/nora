@@ -1,11 +1,12 @@
 import Image from 'next/image';
-import { ArrowRight, ArrowUpRight, BookOpen, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import { mediaSrc } from '@/lib/content/media';
 import type { SiteContent } from '@/lib/content/types';
+import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function BlogView({ locale, content }: { locale: AppLocale; content: SiteContent }) {
@@ -42,7 +43,7 @@ export function BlogView({ locale, content }: { locale: AppLocale; content: Site
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/70 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
 
                   {/* أيقونة فتح المقال العائمة */}
-                  <div className="absolute bottom-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-hover:border-gold-400">
+                  <div className="absolute bottom-3 start-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-gold-400 group-hover:bg-gold-500">
                     <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45" />
                   </div>
                 </div>
@@ -53,10 +54,10 @@ export function BlogView({ locale, content }: { locale: AppLocale; content: Site
                     {/* شارة مقال فاخرة */}
                     <div className="inline-flex items-center gap-1.5 rounded-full border border-gold-200/80 bg-gold-50/80 px-3 py-1 text-xs font-semibold text-gold-700 mb-3">
                       <BookOpen className="h-3 w-3 text-gold-500" />
-                      <span>{locale === 'ar' ? 'مقال' : 'Article'}</span>
+                      <span>{t(INTERFACE_COPY.article, locale)}</span>
                     </div>
 
-                    <h2 className="text-xl font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600 line-clamp-2">
+                    <h2 className="line-clamp-2 text-xl font-bold leading-snug text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
                       {t(post.title, locale)}
                     </h2>
 
@@ -68,7 +69,7 @@ export function BlogView({ locale, content }: { locale: AppLocale; content: Site
                   {/* رابط قراءة المزيد */}
                   <div className="mt-6 pt-4 border-t border-gold-100 flex items-center text-sm font-bold text-gold-600 transition-all duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
                     <span>{nav.readMore}</span>
-                    <ArrowRight className="mr-2 h-4 w-4 rotate-180 rtl:rotate-0 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+                    <ArrowRight className="me-2 h-4 w-4 rotate-180 transition-transform duration-300 group-hover:translate-x-1 rtl:rotate-0 rtl:group-hover:-translate-x-1" />
                   </div>
                 </div>
 

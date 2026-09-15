@@ -6,6 +6,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import { getMailtoLink, getTelLink, getWhatsAppLink } from '@/lib/contact';
 import type { SiteContent } from '@/lib/content/types';
+import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function ContactView({ locale, content }: { locale: AppLocale; content: SiteContent }) {
@@ -33,9 +34,9 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
               <div className="group relative rounded-2xl border border-gold-200/60 bg-white p-8 shadow-sm transition-all duration-500 hover:border-gold-300 hover:shadow-xl hover:shadow-gold-500/5">
                 
                 {/* الشارة العلوية */}
-                <div className="inline-flex items-center gap-2 rounded-full border border-gold-200 bg-gold-50/80 px-3.5 py-1 text-xs font-semibold text-gold-700 mb-8">
-                  <Sparkles className="h-3.5 w-3.5 text-gold-500" />
-                  <span>{locale === 'ar' ? 'معلومات الاتصال الفاخرة' : 'Direct Channels'}</span>
+                <div className="mb-8 inline-flex max-w-full items-center gap-2 rounded-full border border-gold-200 bg-gold-50/80 px-3.5 py-1 text-xs font-semibold leading-snug text-gold-700">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0 text-gold-500" />
+                  <span>{t(INTERFACE_COPY.contactChannels, locale)}</span>
                 </div>
 
                 <div className="space-y-6">
@@ -60,7 +61,7 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                     </a>
                   </ContactRow>
 
-                  <ContactRow icon={Mail} label="Email">
+                  <ContactRow icon={Mail} label={t(INTERFACE_COPY.email, locale)}>
                     <a
                       href={getMailtoLink(settings.email)}
                       className="break-all text-lg font-bold text-charcoal-900 transition-colors duration-300 hover:text-gold-600"
@@ -69,13 +70,13 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                     </a>
                   </ContactRow>
 
-                  <ContactRow icon={MapPin} label={locale === 'ar' ? 'العنوان' : 'Address'}>
+                  <ContactRow icon={MapPin} label={t(INTERFACE_COPY.address, locale)}>
                     <span className="text-base font-semibold text-charcoal-800 leading-snug">
                       {t(settings.address, locale)}
                     </span>
                   </ContactRow>
 
-                  <ContactRow icon={Clock} label={locale === 'ar' ? 'ساعات العمل' : 'Working Hours'}>
+                  <ContactRow icon={Clock} label={t(INTERFACE_COPY.workingHours, locale)}>
                     <span className="text-base font-semibold text-charcoal-800 leading-snug">
                       {t(settings.workingHours, locale)}
                     </span>
@@ -90,16 +91,15 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                     rel="noopener noreferrer"
                     className="btn-whatsapp flex-1 justify-center shadow-md transition-transform duration-300 hover:-translate-y-0.5"
                   >
-                    <MessageCircle className="h-5 w-5" />
-                    <span>{nav.whatsapp}</span>
+                    <MessageCircle className="h-5 w-5 shrink-0" />
+                    <span className="min-w-0">{nav.whatsapp}</span>
                   </a>
                   <a
                     href={tel}
                     className="btn-gold flex-1 justify-center shadow-md transition-transform duration-300 hover:-translate-y-0.5"
-                    dir="ltr"
                   >
-                    <Phone className="h-5 w-5" />
-                    <span>{nav.callUs}</span>
+                    <Phone className="h-5 w-5 shrink-0" />
+                    <span className="min-w-0">{nav.callUs}</span>
                   </a>
                 </div>
 
@@ -124,13 +124,11 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                   />
                 </div>
 
-                <h4 className="text-lg font-bold text-charcoal-900">
-                  {locale === 'ar' ? 'مسح الرمز للتواصل المباشر' : 'Scan to Connect'}
+                <h4 className="text-lg font-bold leading-snug text-charcoal-900">
+                  {t(INTERFACE_COPY.scanQrTitle, locale)}
                 </h4>
-                <p className="mt-2 text-xs text-charcoal-500 max-w-xs leading-relaxed">
-                  {locale === 'ar'
-                    ? 'امسح رمز QR بواسطة كاميرا جوالك لبدء محادثة واتساب مباشرة'
-                    : 'Scan the QR code with your phone camera to start a instant WhatsApp chat'}
+                <p className="mt-2 max-w-xs text-xs leading-relaxed text-charcoal-500">
+                  {t(INTERFACE_COPY.scanQrBody, locale)}
                 </p>
 
                 {/* شريط سفلي جمالي */}
@@ -159,8 +157,10 @@ function ContactRow({
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-gold-200/80 bg-warm-50 text-gold-600 shadow-sm transition-all duration-300 group-hover:bg-gold-50">
         <Icon className="h-5 w-5" />
       </div>
-      <div>
-        <p className="mb-0.5 text-xs font-semibold tracking-wider text-charcoal-500 uppercase">{label}</p>
+      <div className="min-w-0">
+        <p className="mb-0.5 text-xs font-semibold uppercase tracking-wider text-charcoal-500 rtl:tracking-wide">
+          {label}
+        </p>
         {children}
       </div>
     </div>

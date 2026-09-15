@@ -68,8 +68,8 @@ const config: Config = {
         arabic: ['var(--font-cairo)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        hero: ['clamp(2.25rem, 6vw, 5.5rem)', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
-        section: ['clamp(1.75rem, 4vw, 3.5rem)', { lineHeight: '1.15', letterSpacing: '-0.01em' }],
+        hero: ['clamp(2.25rem, 6vw, 5.5rem)', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        section: ['clamp(1.75rem, 4vw, 3.5rem)', { lineHeight: '1.25', letterSpacing: '-0.01em' }],
       },
       spacing: {
         '18': '4.5rem',

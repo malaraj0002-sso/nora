@@ -96,20 +96,17 @@ export function Hero({
 
       {/* المحتوى النصي مع حماية الوضوح عبر drop-shadow */}
       <div className="container-luxury relative z-10 max-w-4xl">
-        <motion.p
-          className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-gold-300 drop-shadow"
-          {...fadeUp(0.08)}
-        >
+        <motion.p className="heading-eyebrow-light drop-shadow" {...fadeUp(0.08)}>
           {pillars}
         </motion.p>
-        <motion.h1 
-          className="text-hero font-bold text-balance text-warm-50 drop-shadow-md" 
+        <motion.h1
+          className="text-hero text-balance font-bold text-warm-50 drop-shadow-md"
           {...fadeUp(0.2)}
         >
           {title}
         </motion.h1>
         <motion.p
-          className="mt-5 max-w-2xl text-base text-warm-50 sm:text-lg lg:text-xl drop-shadow"
+          className="mt-5 max-w-2xl text-base leading-relaxed text-warm-50 sm:text-lg lg:text-xl drop-shadow"
           {...fadeUp(0.34)}
         >
           {subtitle}
@@ -128,8 +125,8 @@ export function Hero({
             whileHover={reduceMotion ? undefined : { scale: 1.03, y: -2 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
           >
-            <MessageCircle className="h-5 w-5" />
-            {whatsappLabel}
+            <MessageCircle className="h-5 w-5 shrink-0" />
+            <span className="min-w-0">{whatsappLabel}</span>
           </motion.a>
           <Link
             href="/projects"

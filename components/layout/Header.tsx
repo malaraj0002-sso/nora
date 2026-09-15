@@ -54,7 +54,7 @@ export function Header() {
   );
 
   const linkClass = (href: string) =>
-    `relative z-10 whitespace-nowrap rounded-lg px-2.5 py-2.5 text-sm font-semibold transition-colors xl:px-3.5 xl:text-base ${
+    `relative z-10 max-w-full rounded-lg px-2 py-2 text-center text-sm font-semibold leading-snug transition-colors xl:px-3.5 xl:text-base ${
       transparent
         ? 'text-warm-50/90 hover:bg-white/10 hover:text-warm-50'
         : 'text-charcoal-700 hover:bg-charcoal-100 hover:text-charcoal-900'
@@ -69,7 +69,7 @@ export function Header() {
             : 'border-b border-charcoal-100 bg-warm-50/95 shadow-sm backdrop-blur-md'
         }`}
       >
-        <div className="container-luxury grid h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 sm:h-24 sm:gap-4">
+        <div className="container-luxury grid min-h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 py-2 sm:min-h-24 sm:gap-4 sm:py-3">
           
           {/* حاوية اللوجو الرئيسية مع ضبط الحجم والمرونة */}
           <div className="relative z-20 flex shrink-0 items-center py-2">
@@ -82,7 +82,7 @@ export function Header() {
             </div>
           </div>
 
-          <nav className="relative z-10 hidden min-w-0 items-center justify-center gap-1 overflow-x-auto overscroll-x-contain lg:flex xl:gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <nav className="relative z-10 hidden min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-1 lg:flex xl:gap-x-2">
             {desktopItems.map((item) => (
               <Link key={item.href} href={item.href} className={linkClass(item.href)}>
                 {item.label}
@@ -98,8 +98,8 @@ export function Header() {
               rel="noopener noreferrer"
               className="btn-whatsapp hidden !min-h-12 !px-4 !py-2.5 text-base xl:inline-flex"
             >
-              <MessageCircle className="h-5 w-5" />
-              {nav.whatsapp}
+              <MessageCircle className="h-5 w-5 shrink-0" />
+              <span className="min-w-0">{nav.whatsapp}</span>
             </a>
             <button
               type="button"
@@ -118,7 +118,7 @@ export function Header() {
       {/* القائمة الجانبية في الشاشات الصغيرة */}
       {menuOpen && (
         <div className="fixed inset-0 z-[60] overflow-y-auto bg-charcoal-950/95 text-warm-50 lg:hidden">
-          <div className="container-luxury flex h-20 items-center justify-between sm:h-24">
+          <div className="container-luxury flex min-h-20 items-center justify-between gap-3 py-2 sm:min-h-24 sm:py-3">
             <div className="flex items-center">
               <BrandLockup
                 logoUrl={logo}
@@ -140,7 +140,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-lg px-3 py-3.5 text-xl font-medium hover:bg-white/10"
+                className="rounded-lg px-3 py-3.5 text-xl font-medium leading-snug hover:bg-white/10"
                 onClick={() => setMenuOpen(false)}
               >
                 {item.label}

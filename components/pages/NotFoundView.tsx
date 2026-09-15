@@ -9,7 +9,7 @@ export function NotFoundView({ locale, content }: { locale: AppLocale; content: 
   const nav = content.nav[locale];
 
   return (
-    <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-warm-50/60 py-20">
+    <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-warm-50/60 pb-20 pt-28 sm:pt-32">
       {/* خلفية جمالية ضوئية */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30">
         <div className="h-[380px] w-[380px] rounded-full bg-gold-300/20 blur-3xl" />

@@ -14,7 +14,7 @@ export function PageHero({
   image?: string;
 }) {
   return (
-    <section className="relative flex min-h-[240px] items-center overflow-hidden py-20 sm:min-h-[300px] sm:py-24">
+    <section className="relative flex min-h-[240px] items-center overflow-hidden pb-16 pt-28 sm:min-h-[300px] sm:pb-20 sm:pt-32">
       {image ? (
         <>
           <Image
@@ -32,10 +32,12 @@ export function PageHero({
       )}
       <div className="container-luxury relative">
         <Reveal>
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-gold-300">{eyebrow}</p>
-          <h1 className="text-3xl font-bold text-warm-50 sm:text-4xl lg:text-5xl">{title}</h1>
+          <p className="heading-eyebrow-light">{eyebrow}</p>
+          <h1 className="max-w-4xl text-3xl font-bold leading-snug text-warm-50 sm:text-4xl lg:text-5xl">
+            {title}
+          </h1>
           {subtitle ? (
-            <p className="mt-4 max-w-2xl text-base text-warm-50/70 sm:text-lg">{subtitle}</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-warm-50/70 sm:text-lg">{subtitle}</p>
           ) : null}
         </Reveal>
       </div>

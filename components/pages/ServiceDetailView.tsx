@@ -4,6 +4,7 @@ import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import type { SiteContent } from '@/lib/content/types';
+import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function ServiceDetailView({
@@ -34,9 +35,9 @@ export function ServiceDetailView({
             <div className="rounded-2xl border border-gold-200/60 bg-white p-8 shadow-sm relative overflow-hidden">
               
               {/* شارة علوية */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-gold-200 bg-gold-50/80 px-3.5 py-1 text-xs font-semibold text-gold-700 mb-6">
-                <Sparkles className="h-3.5 w-3.5 text-gold-500" />
-                <span>{locale === 'ar' ? 'مميزات الخدمة الفاخرة' : 'Service Features'}</span>
+              <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-gold-200 bg-gold-50/80 px-3.5 py-1 text-xs font-semibold leading-snug text-gold-700">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-gold-500" />
+                <span>{t(INTERFACE_COPY.serviceFeatures, locale)}</span>
               </div>
 
               {/* قائمة المميزات الفاخرة */}
@@ -47,7 +48,7 @@ export function ServiceDetailView({
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-gold-200 bg-gold-50 text-gold-600 transition-colors duration-300 group-hover:bg-gold-500 group-hover:text-white">
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
-                      <span className="text-sm font-semibold text-charcoal-800 leading-relaxed pt-0.5">
+                      <span className="min-w-0 pt-0.5 text-sm font-semibold leading-relaxed text-charcoal-800">
                         {t(f, locale)}
                       </span>
                     </li>

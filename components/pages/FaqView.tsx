@@ -18,12 +18,12 @@ export function FaqView({ locale, content }: { locale: AppLocale; content: SiteC
           {items.map((item, i) => (
             <Reveal key={item.id} delay={i * 30}>
               <details className="group relative rounded-2xl border border-gold-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:border-gold-400 hover:shadow-md [&[open]]:border-gold-400 [&[open]]:bg-white [&[open]]:shadow-lg">
-                <summary className="flex cursor-pointer items-center justify-between gap-4 font-bold text-charcoal-900 list-none select-none transition-colors group-hover:text-gold-600 [&::-webkit-details-marker]:hidden">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gold-200 bg-gold-50/80 text-gold-600 transition-colors group-hover:bg-gold-500 group-hover:text-white">
+                <summary className="flex cursor-pointer items-start justify-between gap-4 list-none font-bold text-charcoal-900 select-none transition-colors group-hover:text-gold-600 [&::-webkit-details-marker]:hidden">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gold-200 bg-gold-50/80 text-gold-600 transition-colors group-hover:bg-gold-500 group-hover:text-white">
                       <HelpCircle className="h-4 w-4" />
                     </div>
-                    <span className="text-base sm:text-lg leading-snug">
+                    <span className="min-w-0 flex-1 text-base leading-snug sm:text-lg">
                       {t(item.question, locale)}
                     </span>
                   </div>
