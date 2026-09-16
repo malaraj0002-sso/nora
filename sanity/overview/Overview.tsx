@@ -102,9 +102,12 @@ export function Overview() {
         router.navigateIntent('edit', { type, id });
         return;
       }
-      router.navigateUrl({ path: `/structure/${type}` });
+      // navigateUrl() pushes a full pathname. Omitting /studio makes Sanity
+      // treat the URL as outside this workspace → "Workspace not found".
+      const structureRoot = router.resolvePathFromState({ tool: 'structure' });
+      router.navigateUrl({ path: `${structureRoot}/${type}` });
     } catch {
-      window.location.assign(id ? `/studio/structure/${id}` : `/studio/structure/${type}`);
+      window.location.assign(`/studio/structure/${type}`);
     }
   }
 
