@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { images } from '@/lib/content/images';
 import { mediaSrc } from '@/lib/content/media';
@@ -15,6 +15,9 @@ const FALLBACK_SLIDES = [
   images.kitchen2,
   images.wardrobe1,
 ];
+
+const SLIDE_INTERVAL_MS = 5000;
+const FADE_MS = 1400;
 
 export function Hero({
   title,
@@ -35,24 +38,76 @@ export function Hero({
 }) {
   const reduceMotion = useReducedMotion();
 
-  const rawSlides = slides && slides.length > 0 ? slides : FALLBACK_SLIDES;
-  const activeSlides = rawSlides.map((s) => mediaSrc(s)).filter(Boolean);
+  const activeSlides = useMemo(() => {
+    const raw = slides && slides.length > 0 ? slides : FALLBACK_SLIDES;
+    return raw.map((s) => mediaSrc(s)).filter(Boolean);
+  }, [slides]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [outgoingSlide, setOutgoingSlide] = useState<number | null>(null);
+  const loadedRef = useRef(new Set<string>());
+  const currentRef = useRef(0);
+  const slidesRef = useRef(activeSlides);
+  currentRef.current = currentSlide;
+  slidesRef.current = activeSlides;
+
+  const markLoaded = useCallback((src: string) => {
+    loadedRef.current.add(src);
+  }, []);
+
+  const goToSlide = useCallback(
+    (next: number) => {
+      const prev = currentRef.current;
+      if (next === prev || next < 0 || next >= activeSlides.length) return;
+      if (!reduceMotion) setOutgoingSlide(prev);
+      setCurrentSlide(next);
+    },
+    [activeSlides.length, reduceMotion],
+  );
 
   useEffect(() => {
     setCurrentSlide((prev) => (prev >= activeSlides.length ? 0 : prev));
   }, [activeSlides.length]);
 
   useEffect(() => {
-    if (reduceMotion || activeSlides.length < 2) return;
-    const timer = window.setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [reduceMotion, activeSlides.length]);
+    if (outgoingSlide === null) return;
+    const timer = window.setTimeout(() => setOutgoingSlide(null), FADE_MS);
+    return () => window.clearTimeout(timer);
+  }, [outgoingSlide, currentSlide]);
 
-  const slideSrc = activeSlides[currentSlide] ?? activeSlides[0];
+  useEffect(() => {
+    if (reduceMotion || activeSlides.length < 2) return;
+
+    let timeoutId = 0;
+    let waitingSince: number | null = null;
+
+    const schedule = (ms: number) => {
+      timeoutId = window.setTimeout(tick, ms);
+    };
+
+    const tick = () => {
+      const list = slidesRef.current;
+      const prev = currentRef.current;
+      const next = (prev + 1) % list.length;
+      const nextSrc = list[next];
+      const ready = !nextSrc || loadedRef.current.has(nextSrc);
+
+      if (!ready) {
+        if (waitingSince === null) waitingSince = Date.now();
+        if (Date.now() - waitingSince < 2000) {
+          schedule(250);
+          return;
+        }
+      }
+
+      waitingSince = null;
+      goToSlide(next);
+      schedule(SLIDE_INTERVAL_MS);
+    };
+
+    schedule(SLIDE_INTERVAL_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [reduceMotion, activeSlides.length, goToSlide]);
 
   const fadeUp = (delay: number) =>
     reduceMotion
@@ -68,30 +123,37 @@ export function Hero({
       
       {/* خلفية السلايدر بألوان الصور الأصلية 100% */}
       <div className="pointer-events-none absolute inset-0">
-        <AnimatePresence mode="sync">
-          <motion.div
-            key={slideSrc}
-            className="absolute inset-0"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 1.4, ease: 'easeInOut' }}
-          >
-            {slideSrc ? (
+        {activeSlides.map((src, idx) => {
+          const isCurrent = idx === currentSlide;
+          const isOutgoing = idx === outgoingSlide;
+          const visible = isCurrent || isOutgoing;
+          return (
+            <div
+              key={`${idx}-${src}`}
+              className="absolute inset-0"
+              style={{
+                opacity: visible ? 1 : 0,
+                zIndex: isCurrent ? 2 : isOutgoing ? 1 : 0,
+                transition: reduceMotion ? 'none' : `opacity ${FADE_MS}ms ease-in-out`,
+              }}
+              aria-hidden={!isCurrent}
+            >
               <Image
-                src={slideSrc}
+                src={src}
                 alt=""
                 fill
-                priority={currentSlide === 0}
+                priority={idx === 0}
+                loading={idx === 0 ? undefined : 'eager'}
                 className="object-cover object-center"
                 sizes="100vw"
+                onLoad={() => markLoaded(src)}
               />
-            ) : null}
-          </motion.div>
-        </AnimatePresence>
+            </div>
+          );
+        })}
 
         {/* تعتيم خفيف جداً يغطي فقط المنطقة السفلى خلف النصوص دون التغطية على ألوان باقي الصورة */}
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/70 via-charcoal-950/20 to-transparent" />
+        <div className="absolute inset-0 z-[3] bg-gradient-to-t from-charcoal-950/70 via-charcoal-950/20 to-transparent" />
       </div>
 
       {/* المحتوى النصي مع حماية الوضوح عبر drop-shadow */}
@@ -142,7 +204,7 @@ export function Hero({
             {activeSlides.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => setCurrentSlide(idx)}
+                onClick={() => goToSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-500 pointer-events-auto ${
                   idx === currentSlide
