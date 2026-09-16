@@ -1,3 +1,4 @@
+import { withStudioUiI18n } from '../i18n/schemaUi';
 import { localeString, localeText } from './localeString';
 import { siteSettings } from './siteSettings';
 import { homePage } from './homePage';
@@ -9,7 +10,7 @@ import { testimonial } from './testimonial';
 import { blogPost } from './blogPost';
 import { faqItem } from './faqItem';
 
-export const schemaTypes = [
+export const schemaTypes = withStudioUiI18n([
   localeString,
   localeText,
   siteSettings,
@@ -26,4 +27,4 @@ export const schemaTypes = [
   testimonial,
   blogPost,
   faqItem,
-];
+]);

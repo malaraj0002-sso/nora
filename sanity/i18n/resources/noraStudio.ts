@@ -1,6 +1,9 @@
 /** Nora Group Studio chrome strings. Independent of public website translations. */
 
+import {studioUiResources} from '../schemaUi';
+
 export const noraStudioEn = {
+  ...studioUiResources('en'),
   'language.menu': 'Studio language',
   'structure.overview': 'Overview',
   'structure.website': 'Site',
@@ -49,6 +52,7 @@ export const noraStudioEn = {
 };
 
 export const noraStudioHe = {
+  ...studioUiResources('he'),
   'language.menu': 'שפת הסטודיו',
   'structure.overview': 'סקירה',
   'structure.website': 'האתר',
@@ -97,6 +101,7 @@ export const noraStudioHe = {
 };
 
 export const noraStudioAr = {
+  ...studioUiResources('ar'),
   'language.menu': 'لغة الاستوديو',
   'structure.overview': 'نظرة عامة',
   'structure.website': 'الموقع',

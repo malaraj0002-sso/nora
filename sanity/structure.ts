@@ -32,7 +32,13 @@ function singleton(
     .i18n(titleI18n(key))
     .id(id)
     .icon(icon)
-    .child(S.document().schemaType(id).documentId(id).title(title));
+    .child(
+      S.document()
+        .schemaType(id)
+        .documentId(id)
+        .title(title)
+        .i18n(titleI18n(key)),
+    );
 }
 
 function collection(
@@ -50,6 +56,7 @@ function collection(
     .child(
       S.documentTypeList(type)
         .title(title)
+        .i18n(titleI18n(key))
         .defaultOrdering([{ field: 'order', direction: 'asc' }]),
     );
 }
@@ -65,7 +72,12 @@ export const structure: StructureResolver = (S) =>
         .i18n(titleI18n('structure.overview'))
         .id('overview')
         .icon(DashboardIcon)
-        .child(S.component(Overview).id('overviewPane').title('סקירה')),
+        .child(
+          S.component(Overview)
+            .id('overviewPane')
+            .title('סקירה')
+            .i18n(titleI18n('structure.overview')),
+        ),
       S.divider(),
       S.listItem()
         .title('האתר')
@@ -97,10 +109,16 @@ export const structure: StructureResolver = (S) =>
                     .i18n(titleI18n('structure.faq'))
                     .items([
                       singleton(S, 'faqPage', 'כותרת העמוד', DocumentIcon, 'structure.faqPage'),
-                      S.documentTypeListItem('faqItem')
+                      S.listItem()
                         .title('שאלות')
                         .i18n(titleI18n('structure.faqItems'))
-                        .icon(DocumentIcon),
+                        .id('faqItem')
+                        .icon(DocumentIcon)
+                        .child(
+                          S.documentTypeList('faqItem')
+                            .title('שאלות')
+                            .i18n(titleI18n('structure.faqItems')),
+                        ),
                     ]),
                 ),
               singleton(S, 'contactPage', 'יצירת קשר', UsersIcon, 'structure.contact'),
@@ -116,10 +134,16 @@ export const structure: StructureResolver = (S) =>
                     .i18n(titleI18n('structure.blog'))
                     .items([
                       singleton(S, 'blogPage', 'כותרת העמוד', DocumentIcon, 'structure.blogPage'),
-                      S.documentTypeListItem('blogPost')
+                      S.listItem()
                         .title('מאמרים')
                         .i18n(titleI18n('structure.blogPosts'))
-                        .icon(DocumentIcon),
+                        .id('blogPost')
+                        .icon(DocumentIcon)
+                        .child(
+                          S.documentTypeList('blogPost')
+                            .title('מאמרים')
+                            .i18n(titleI18n('structure.blogPosts')),
+                        ),
                     ]),
                 ),
             ]),
@@ -136,10 +160,16 @@ export const structure: StructureResolver = (S) =>
             .i18n(titleI18n('structure.websiteSettings'))
             .items([
               singleton(S, 'siteSettings', 'כללי · יצירת קשר · SEO', CogIcon, 'structure.siteSettings'),
-              S.documentTypeListItem('uiLabels')
+              S.listItem()
                 .title('תפריט וטקסטים')
                 .i18n(titleI18n('structure.uiLabels'))
-                .icon(ControlsIcon),
+                .id('uiLabels')
+                .icon(ControlsIcon)
+                .child(
+                  S.documentTypeList('uiLabels')
+                    .title('תפריט וטקסטים')
+                    .i18n(titleI18n('structure.uiLabels')),
+                ),
             ]),
         ),
       S.listItem()
