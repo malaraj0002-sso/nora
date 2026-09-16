@@ -13,25 +13,48 @@ import {
   UsersIcon,
 } from '@sanity/icons';
 import type { StructureBuilder, StructureResolver } from 'sanity/structure';
+import { NORA_STUDIO_NS } from './i18n/constants';
 import { Overview } from './overview/Overview';
 
-function singleton(S: StructureBuilder, id: string, title: string, icon: typeof HomeIcon) {
+function titleI18n(key: string) {
+  return { title: { key, ns: NORA_STUDIO_NS } };
+}
+
+function singleton(
+  S: StructureBuilder,
+  id: string,
+  title: string,
+  icon: typeof HomeIcon,
+  key: string,
+) {
   return S.listItem()
     .title(title)
+    .i18n(titleI18n(key))
     .id(id)
     .icon(icon)
     .child(S.document().schemaType(id).documentId(id).title(title));
 }
 
-function collection(S: StructureBuilder, type: string, title: string, icon: typeof HomeIcon) {
+function collection(
+  S: StructureBuilder,
+  type: string,
+  title: string,
+  icon: typeof HomeIcon,
+  key: string,
+) {
   return S.listItem()
     .title(title)
+    .i18n(titleI18n(key))
     .id(type)
     .icon(icon)
-    .child(S.documentTypeList(type).title(title).defaultOrdering([{ field: 'order', direction: 'asc' }]));
+    .child(
+      S.documentTypeList(type)
+        .title(title)
+        .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+    );
 }
 
-/** Desk mirrors the public website. Hebrew labels for the business owner. */
+/** Desk mirrors the public website. Labels follow the Studio UI language. */
 export const structure: StructureResolver = (S) =>
   S.list()
     .id('root')
@@ -39,76 +62,96 @@ export const structure: StructureResolver = (S) =>
     .items([
       S.listItem()
         .title('סקירה')
+        .i18n(titleI18n('structure.overview'))
         .id('overview')
         .icon(DashboardIcon)
         .child(S.component(Overview).id('overviewPane').title('סקירה')),
       S.divider(),
       S.listItem()
         .title('האתר')
+        .i18n(titleI18n('structure.website'))
         .id('website')
         .icon(MasterDetailIcon)
         .child(
           S.list()
             .id('websiteList')
             .title('האתר')
+            .i18n(titleI18n('structure.website'))
             .items([
-              singleton(S, 'homePage', 'דף הבית', HomeIcon),
-              singleton(S, 'aboutPage', 'אודות', InfoOutlineIcon),
-              collection(S, 'service', 'שירותים', CaseIcon),
-              collection(S, 'project', 'פרויקטים', ImagesIcon),
-              collection(S, 'material', 'חומרים', EarthGlobeIcon),
-              singleton(S, 'howWeWorkPage', 'איך אנחנו עובדים', ControlsIcon),
-              collection(S, 'testimonial', 'המלצות', CommentIcon),
+              singleton(S, 'homePage', 'דף הבית', HomeIcon, 'structure.home'),
+              singleton(S, 'aboutPage', 'אודות', InfoOutlineIcon, 'structure.about'),
+              collection(S, 'service', 'שירותים', CaseIcon, 'structure.services'),
+              collection(S, 'project', 'פרויקטים', ImagesIcon, 'structure.projects'),
+              collection(S, 'material', 'חומרים', EarthGlobeIcon, 'structure.materials'),
+              singleton(S, 'howWeWorkPage', 'איך אנחנו עובדים', ControlsIcon, 'structure.howWeWork'),
+              collection(S, 'testimonial', 'המלצות', CommentIcon, 'structure.testimonials'),
               S.listItem()
                 .title('שאלות נפוצות')
+                .i18n(titleI18n('structure.faq'))
                 .id('faq')
                 .icon(DocumentIcon)
                 .child(
                   S.list()
                     .id('faqList')
                     .title('שאלות נפוצות')
+                    .i18n(titleI18n('structure.faq'))
                     .items([
-                      singleton(S, 'faqPage', 'כותרת העמוד', DocumentIcon),
-                      S.documentTypeListItem('faqItem').title('שאלות').icon(DocumentIcon),
+                      singleton(S, 'faqPage', 'כותרת העמוד', DocumentIcon, 'structure.faqPage'),
+                      S.documentTypeListItem('faqItem')
+                        .title('שאלות')
+                        .i18n(titleI18n('structure.faqItems'))
+                        .icon(DocumentIcon),
                     ]),
                 ),
-              singleton(S, 'contactPage', 'יצירת קשר', UsersIcon),
+              singleton(S, 'contactPage', 'יצירת קשר', UsersIcon, 'structure.contact'),
               S.listItem()
                 .title('בלוג')
+                .i18n(titleI18n('structure.blog'))
                 .id('blog')
                 .icon(DocumentIcon)
                 .child(
                   S.list()
                     .id('blogList')
                     .title('בלוג')
+                    .i18n(titleI18n('structure.blog'))
                     .items([
-                      singleton(S, 'blogPage', 'כותרת העמוד', DocumentIcon),
-                      S.documentTypeListItem('blogPost').title('מאמרים').icon(DocumentIcon),
+                      singleton(S, 'blogPage', 'כותרת העמוד', DocumentIcon, 'structure.blogPage'),
+                      S.documentTypeListItem('blogPost')
+                        .title('מאמרים')
+                        .i18n(titleI18n('structure.blogPosts'))
+                        .icon(DocumentIcon),
                     ]),
                 ),
             ]),
         ),
       S.listItem()
         .title('הגדרות האתר')
+        .i18n(titleI18n('structure.websiteSettings'))
         .id('websiteSettings')
         .icon(CogIcon)
         .child(
           S.list()
             .id('websiteSettingsList')
             .title('הגדרות האתר')
+            .i18n(titleI18n('structure.websiteSettings'))
             .items([
-              singleton(S, 'siteSettings', 'כללי · יצירת קשר · SEO', CogIcon),
-              S.documentTypeListItem('uiLabels').title('תפריט וטקסטים').icon(ControlsIcon),
+              singleton(S, 'siteSettings', 'כללי · יצירת קשר · SEO', CogIcon, 'structure.siteSettings'),
+              S.documentTypeListItem('uiLabels')
+                .title('תפריט וטקסטים')
+                .i18n(titleI18n('structure.uiLabels'))
+                .icon(ControlsIcon),
             ]),
         ),
       S.listItem()
         .title('מדיה')
+        .i18n(titleI18n('structure.media'))
         .id('media')
         .icon(ImagesIcon)
         .child(
           S.documentList()
             .id('mediaAssets')
             .title('מדיה')
+            .i18n(titleI18n('structure.media'))
             .schemaType('sanity.imageAsset')
             .filter('_type == "sanity.imageAsset"')
             .defaultOrdering([{ field: '_updatedAt', direction: 'desc' }]),

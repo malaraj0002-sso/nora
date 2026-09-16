@@ -5,6 +5,9 @@ import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { DashboardIcon } from '@sanity/icons';
 import { apiVersion, dataset, projectId } from './sanity/env';
+import { noraStudioLocales } from './sanity/i18n/plugin';
+import { StudioI18nLayout } from './sanity/i18n/StudioI18nLayout';
+import { StudioNavbar } from './sanity/i18n/StudioNavbar';
 import { Overview } from './sanity/overview/Overview';
 import { schemaTypes } from './sanity/schemaTypes';
 import { structure } from './sanity/structure';
@@ -21,7 +24,14 @@ export default defineConfig({
   title: 'Nora Group',
   theme: noraStudioTheme,
   schema: { types: schemaTypes },
+  studio: {
+    components: {
+      layout: StudioI18nLayout,
+      navbar: StudioNavbar,
+    },
+  },
   plugins: [
+    noraStudioLocales(),
     structureTool({ name: 'structure', title: 'האתר', structure }),
     visionTool({ defaultApiVersion: apiVersion }),
   ],

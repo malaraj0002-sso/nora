@@ -12,9 +12,10 @@ import {
   InfoOutlineIcon,
   UsersIcon,
 } from '@sanity/icons';
-import { useClient } from 'sanity';
+import { useClient, useTranslation } from 'sanity';
 import { useRouter } from 'sanity/router';
 import { apiVersion } from '../env';
+import { NORA_STUDIO_NS } from '../i18n/constants';
 
 type Counts = {
   projects: number;
@@ -49,6 +50,7 @@ function published(type: string) {
 export function Overview() {
   const client = useClient({ apiVersion });
   const router = useRouter();
+  const { t } = useTranslation(NORA_STUDIO_NS);
   const [counts, setCounts] = useState<Counts>(EMPTY);
   const [loaded, setLoaded] = useState(false);
 
@@ -112,26 +114,25 @@ export function Overview() {
     icon: typeof HomeIcon;
     onClick: () => void;
   }[] = [
-    { key: 'projects', label: 'פרויקטים', icon: ImagesIcon, onClick: () => openDoc('project') },
-    { key: 'materials', label: 'חומרים', icon: EarthGlobeIcon, onClick: () => openDoc('material') },
-    { key: 'services', label: 'שירותים', icon: CaseIcon, onClick: () => openDoc('service') },
-    { key: 'posts', label: 'בלוג', icon: DocumentIcon, onClick: () => openDoc('blogPost') },
-    { key: 'testimonials', label: 'המלצות', icon: CommentIcon, onClick: () => openDoc('testimonial') },
-    { key: 'slides', label: 'תמונות הירו', icon: ImagesIcon, onClick: () => openDoc('homePage', 'homePage') },
+    { key: 'projects', label: t('overview.stat.projects'), icon: ImagesIcon, onClick: () => openDoc('project') },
+    { key: 'materials', label: t('overview.stat.materials'), icon: EarthGlobeIcon, onClick: () => openDoc('material') },
+    { key: 'services', label: t('overview.stat.services'), icon: CaseIcon, onClick: () => openDoc('service') },
+    { key: 'posts', label: t('overview.stat.posts'), icon: DocumentIcon, onClick: () => openDoc('blogPost') },
+    { key: 'testimonials', label: t('overview.stat.testimonials'), icon: CommentIcon, onClick: () => openDoc('testimonial') },
+    { key: 'slides', label: t('overview.stat.slides'), icon: ImagesIcon, onClick: () => openDoc('homePage', 'homePage') },
   ];
 
   const actions = [
-    { label: 'הגדרות האתר', icon: CogIcon, onClick: () => openDoc('siteSettings', 'siteSettings') },
-    { label: 'דף הבית', icon: HomeIcon, onClick: () => openDoc('homePage', 'homePage') },
-    { label: 'אודות', icon: InfoOutlineIcon, onClick: () => openDoc('aboutPage', 'aboutPage') },
-    { label: 'פרויקטים', icon: ImagesIcon, onClick: () => openDoc('project') },
-    { label: 'שירותים', icon: CaseIcon, onClick: () => openDoc('service') },
-    { label: 'יצירת קשר', icon: UsersIcon, onClick: () => openDoc('contactPage', 'contactPage') },
+    { label: t('overview.action.settings'), icon: CogIcon, onClick: () => openDoc('siteSettings', 'siteSettings') },
+    { label: t('overview.action.home'), icon: HomeIcon, onClick: () => openDoc('homePage', 'homePage') },
+    { label: t('overview.action.about'), icon: InfoOutlineIcon, onClick: () => openDoc('aboutPage', 'aboutPage') },
+    { label: t('overview.action.projects'), icon: ImagesIcon, onClick: () => openDoc('project') },
+    { label: t('overview.action.services'), icon: CaseIcon, onClick: () => openDoc('service') },
+    { label: t('overview.action.contact'), icon: UsersIcon, onClick: () => openDoc('contactPage', 'contactPage') },
   ];
 
   return (
     <div
-      dir="rtl"
       style={{
         minHeight: '100%',
         padding: '2rem 1.5rem 3rem',
@@ -144,10 +145,9 @@ export function Overview() {
         <p style={{ margin: 0, color: GOLD, fontSize: 12, letterSpacing: '0.14em', fontWeight: 700 }}>
           NORA GROUP
         </p>
-        <h1 style={{ margin: '0.35rem 0 0', fontSize: 32, fontWeight: 700 }}>סקירת האתר</h1>
+        <h1 style={{ margin: '0.35rem 0 0', fontSize: 32, fontWeight: 700 }}>{t('overview.title')}</h1>
         <p style={{ margin: '0.6rem 0 0', color: MUTED, maxWidth: 620, lineHeight: 1.7 }}>
-          ערכו טקסטים ותמונות כאן, ואז Publish. האתר מתעדכן דרך ה־webhook — בלי פריסה מחדש.
-          קרדיט lazaCore בפוטר קבוע בקוד.
+          {t('overview.intro')}
         </p>
 
         <div
@@ -167,7 +167,7 @@ export function Overview() {
                   {loaded ? counts[item.key] : '—'}
                 </span>
                 <span style={{ color: MUTED, fontSize: 13 }}>{item.label}</span>
-                <span style={{ color: GOLD, fontSize: 11 }}>פורסם</span>
+                <span style={{ color: GOLD, fontSize: 11 }}>{t('overview.published')}</span>
               </button>
             );
           })}
@@ -183,7 +183,7 @@ export function Overview() {
           className="nora-overview-split"
         >
           <section style={panel}>
-            <h2 style={panelTitle}>קיצורי דרך</h2>
+            <h2 style={panelTitle}>{t('overview.shortcuts')}</h2>
             <div
               style={{
                 display: 'grid',
@@ -204,13 +204,13 @@ export function Overview() {
           </section>
 
           <section style={panel}>
-            <h2 style={panelTitle}>מצב האתר</h2>
-            <StatusRow label="מותג" value="Nora Group" />
-            <StatusRow label="שאלות נפוצות" value={loaded ? String(counts.faqs) : '—'} />
-            <StatusRow label="המלצות" value={loaded ? String(counts.testimonials) : '—'} />
-            <StatusRow icon={UsersIcon} label="יצירת קשר" value="טלפון ווואטסאפ בלבד" />
+            <h2 style={panelTitle}>{t('overview.siteStatus')}</h2>
+            <StatusRow label={t('overview.brand')} value="Nora Group" />
+            <StatusRow label={t('overview.faqs')} value={loaded ? String(counts.faqs) : '—'} />
+            <StatusRow label={t('overview.testimonials')} value={loaded ? String(counts.testimonials) : '—'} />
+            <StatusRow icon={UsersIcon} label={t('overview.action.contact')} value={t('overview.contactValue')} />
             <p style={{ margin: '1rem 0 0', color: MUTED, fontSize: 12, lineHeight: 1.6 }}>
-              אחרי Publish המתינו רגע ורעננו את האתר. אין טופס הצעת מחיר ואין שירותי דלתות.
+              {t('overview.afterPublish')}
             </p>
           </section>
         </div>
@@ -265,7 +265,7 @@ const cardButton: CSSProperties = {
   borderRadius: 14,
   color: INK,
   cursor: 'pointer',
-  textAlign: 'right',
+  textAlign: 'start',
 };
 
 const actionButton: CSSProperties = {
@@ -281,7 +281,7 @@ const actionButton: CSSProperties = {
   cursor: 'pointer',
   fontSize: 13,
   fontWeight: 600,
-  textAlign: 'right',
+  textAlign: 'start',
 };
 
 const panel: CSSProperties = {
