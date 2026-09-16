@@ -7,7 +7,7 @@ import { loadSlugPage } from '@/lib/i18n/loadPage';
 import { localeSlugStaticParams } from '@/lib/i18n/staticParams';
 import { t } from '@/lib/i18n/locale';
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
-import { brandedTitle, buildPageMetadata } from '@/lib/seo/metadata';
+import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateStaticParams() {
   const content = await getSiteContent();
@@ -22,12 +22,14 @@ export async function generateMetadata({
   const { locale, content, slug } = await loadSlugPage(params);
   const project = content.projects.find((p) => p.visible && p.slug === slug);
   if (!project) return {};
-  return buildPageMetadata({
+  return resolveCmsSeo({
     locale,
     path: `/projects/${slug}`,
-    title: brandedTitle(t(project.title, locale), content.settings.brandName),
-    description: t(project.description, locale),
-    image: project.images[0],
+    brand: content.settings.brandName,
+    seo: project.seo,
+    fallbackTitle: t(project.title, locale),
+    fallbackDescription: t(project.description, locale),
+    fallbackImage: project.images[0],
   });
 }
 

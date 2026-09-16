@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import { FaqView } from '@/components/pages/FaqView';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { loadLocalePage } from '@/lib/i18n/loadPage';
+import { t } from '@/lib/i18n/locale';
 import { breadcrumbJsonLd, faqPageJsonLd } from '@/lib/seo/jsonld';
-import { brandedTitle, buildPageMetadata } from '@/lib/seo/metadata';
+import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateMetadata({
   params,
@@ -11,12 +12,14 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale, content } = await loadLocalePage(params);
-  const nav = content.nav[locale];
-  return buildPageMetadata({
+  return resolveCmsSeo({
     locale,
     path: '/faq',
-    title: brandedTitle(nav.faq, content.settings.brandName),
-    description: content.ui[locale].footerTagline,
+    brand: content.settings.brandName,
+    seo: content.faqPage.seo,
+    fallbackTitle: t(content.faqPage.title, locale) || content.nav[locale].faq,
+    fallbackDescription: t(content.faqPage.subtitle, locale) || content.ui[locale].footerTagline,
+    fallbackImage: content.faqPage.image,
   });
 }
 

@@ -11,7 +11,12 @@ export function FaqView({ locale, content }: { locale: AppLocale; content: SiteC
 
   return (
     <>
-      <PageHero eyebrow={nav.faq} title={nav.faq} subtitle="" />
+      <PageHero
+        eyebrow={t(content.faqPage.eyebrow, locale) || nav.faq}
+        title={t(content.faqPage.title, locale) || nav.faq}
+        subtitle={t(content.faqPage.subtitle, locale)}
+        image={content.faqPage.image}
+      />
 
       <section className="section-padding bg-warm-50/60 relative overflow-hidden">
         <div className="container-luxury max-w-3xl space-y-4">

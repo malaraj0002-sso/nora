@@ -7,7 +7,7 @@ import { loadSlugPage } from '@/lib/i18n/loadPage';
 import { localeSlugStaticParams } from '@/lib/i18n/staticParams';
 import { t } from '@/lib/i18n/locale';
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonld';
-import { brandedTitle, buildPageMetadata } from '@/lib/seo/metadata';
+import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateStaticParams() {
   const content = await getSiteContent();
@@ -22,12 +22,14 @@ export async function generateMetadata({
   const { locale, content, slug } = await loadSlugPage(params);
   const post = await getBlogPost(slug);
   if (!post) return {};
-  return buildPageMetadata({
+  return resolveCmsSeo({
     locale,
     path: `/blog/${slug}`,
-    title: brandedTitle(t(post.title, locale), content.settings.brandName),
-    description: t(post.excerpt, locale),
-    image: post.image,
+    brand: content.settings.brandName,
+    seo: post.seo,
+    fallbackTitle: t(post.title, locale),
+    fallbackDescription: t(post.excerpt, locale),
+    fallbackImage: post.image,
     ogType: 'article',
   });
 }

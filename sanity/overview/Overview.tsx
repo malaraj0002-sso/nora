@@ -14,7 +14,7 @@ import {
 } from '@sanity/icons';
 import { useClient } from 'sanity';
 import { useRouter } from 'sanity/router';
-import { apiVersion } from '@/sanity/env';
+import { apiVersion } from '../env';
 
 type Counts = {
   projects: number;
@@ -112,21 +112,21 @@ export function Overview() {
     icon: typeof HomeIcon;
     onClick: () => void;
   }[] = [
-    { key: 'projects', label: 'المشاريع', icon: ImagesIcon, onClick: () => openDoc('project') },
-    { key: 'materials', label: 'المواد', icon: EarthGlobeIcon, onClick: () => openDoc('material') },
-    { key: 'services', label: 'الخدمات', icon: CaseIcon, onClick: () => openDoc('service') },
-    { key: 'posts', label: 'المدونة', icon: DocumentIcon, onClick: () => openDoc('blogPost') },
-    { key: 'testimonials', label: 'آراء العملاء', icon: CommentIcon, onClick: () => openDoc('testimonial') },
-    { key: 'slides', label: 'صور الهيرو', icon: ImagesIcon, onClick: () => openDoc('homePage', 'homePage') },
+    { key: 'projects', label: 'פרויקטים', icon: ImagesIcon, onClick: () => openDoc('project') },
+    { key: 'materials', label: 'חומרים', icon: EarthGlobeIcon, onClick: () => openDoc('material') },
+    { key: 'services', label: 'שירותים', icon: CaseIcon, onClick: () => openDoc('service') },
+    { key: 'posts', label: 'בלוג', icon: DocumentIcon, onClick: () => openDoc('blogPost') },
+    { key: 'testimonials', label: 'המלצות', icon: CommentIcon, onClick: () => openDoc('testimonial') },
+    { key: 'slides', label: 'תמונות הירו', icon: ImagesIcon, onClick: () => openDoc('homePage', 'homePage') },
   ];
 
   const actions = [
-    { label: 'إعدادات الموقع', icon: CogIcon, onClick: () => openDoc('siteSettings', 'siteSettings') },
-    { label: 'من نحن', icon: InfoOutlineIcon, onClick: () => openDoc('aboutPage', 'aboutPage') },
-    { label: 'المشاريع', icon: ImagesIcon, onClick: () => openDoc('project') },
-    { label: 'المواد', icon: EarthGlobeIcon, onClick: () => openDoc('material') },
-    { label: 'الخدمات', icon: CaseIcon, onClick: () => openDoc('service') },
-    { label: 'المدونة', icon: DocumentIcon, onClick: () => openDoc('blogPost') },
+    { label: 'הגדרות האתר', icon: CogIcon, onClick: () => openDoc('siteSettings', 'siteSettings') },
+    { label: 'דף הבית', icon: HomeIcon, onClick: () => openDoc('homePage', 'homePage') },
+    { label: 'אודות', icon: InfoOutlineIcon, onClick: () => openDoc('aboutPage', 'aboutPage') },
+    { label: 'פרויקטים', icon: ImagesIcon, onClick: () => openDoc('project') },
+    { label: 'שירותים', icon: CaseIcon, onClick: () => openDoc('service') },
+    { label: 'יצירת קשר', icon: UsersIcon, onClick: () => openDoc('contactPage', 'contactPage') },
   ];
 
   return (
@@ -137,16 +137,17 @@ export function Overview() {
         padding: '2rem 1.5rem 3rem',
         background: '#0c0c0c',
         color: INK,
-        fontFamily: 'Cairo, system-ui, sans-serif',
+        fontFamily: 'Noto Sans Hebrew, Cairo, system-ui, sans-serif',
       }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <p style={{ margin: 0, color: GOLD, fontSize: 12, letterSpacing: '0.14em', fontWeight: 700 }}>
-          Nora Group
+          NORA GROUP
         </p>
-        <h1 style={{ margin: '0.35rem 0 0', fontSize: 32, fontWeight: 700 }}>نظرة عامة</h1>
-        <p style={{ margin: '0.6rem 0 0', color: MUTED, maxWidth: 560, lineHeight: 1.6 }}>
-          عدّل النصوص والصور من هنا، ثم اضغط Publish. الموقع يتحدّث بعد الحفظ. لا تغيّر تسميات الواجهة إلا عند الحاجة.
+        <h1 style={{ margin: '0.35rem 0 0', fontSize: 32, fontWeight: 700 }}>סקירת האתר</h1>
+        <p style={{ margin: '0.6rem 0 0', color: MUTED, maxWidth: 620, lineHeight: 1.7 }}>
+          ערכו טקסטים ותמונות כאן, ואז Publish. האתר מתעדכן דרך ה־webhook — בלי פריסה מחדש.
+          קרדיט lazaCore בפוטר קבוע בקוד.
         </p>
 
         <div
@@ -160,18 +161,13 @@ export function Overview() {
           {stats.map((item) => {
             const Icon = item.icon;
             return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={item.onClick}
-                style={cardButton}
-              >
+              <button key={item.key} type="button" onClick={item.onClick} style={cardButton}>
                 <Icon style={{ width: 22, height: 22, color: GOLD }} />
                 <span style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
                   {loaded ? counts[item.key] : '—'}
                 </span>
                 <span style={{ color: MUTED, fontSize: 13 }}>{item.label}</span>
-                <span style={{ color: GOLD, fontSize: 11 }}>منشور</span>
+                <span style={{ color: GOLD, fontSize: 11 }}>פורסם</span>
               </button>
             );
           })}
@@ -187,7 +183,7 @@ export function Overview() {
           className="nora-overview-split"
         >
           <section style={panel}>
-            <h2 style={panelTitle}>اختصارات</h2>
+            <h2 style={panelTitle}>קיצורי דרך</h2>
             <div
               style={{
                 display: 'grid',
@@ -208,13 +204,13 @@ export function Overview() {
           </section>
 
           <section style={panel}>
-            <h2 style={panelTitle}>حالة الموقع</h2>
-            <StatusRow label="الاسم" value="Nora Group" />
-            <StatusRow label="أسئلة شائعة" value={loaded ? String(counts.faqs) : '—'} />
-            <StatusRow label="آراء العملاء" value={loaded ? String(counts.testimonials) : '—'} />
-            <StatusRow icon={UsersIcon} label="تواصل" value="هاتف وواتساب فقط" />
-            <p style={{ margin: '1rem 0 0', color: MUTED, fontSize: 12, lineHeight: 1.5 }}>
-              بعد Publish انتظر دقيقة أو أعد تحميل الموقع. الهيرو والشعار يظهران من الإعدادات / الصفحة الرئيسية.
+            <h2 style={panelTitle}>מצב האתר</h2>
+            <StatusRow label="מותג" value="Nora Group" />
+            <StatusRow label="שאלות נפוצות" value={loaded ? String(counts.faqs) : '—'} />
+            <StatusRow label="המלצות" value={loaded ? String(counts.testimonials) : '—'} />
+            <StatusRow icon={UsersIcon} label="יצירת קשר" value="טלפון ווואטסאפ בלבד" />
+            <p style={{ margin: '1rem 0 0', color: MUTED, fontSize: 12, lineHeight: 1.6 }}>
+              אחרי Publish המתינו רגע ורעננו את האתר. אין טופס הצעת מחיר ואין שירותי דלתות.
             </p>
           </section>
         </div>

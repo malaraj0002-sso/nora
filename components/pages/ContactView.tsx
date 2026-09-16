@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { Clock, Mail, MapPin, MessageCircle, Phone, Sparkles } from 'lucide-react';
+import { Clock, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Sparkles } from 'lucide-react';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
@@ -71,9 +71,20 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                   </ContactRow>
 
                   <ContactRow icon={MapPin} label={t(INTERFACE_COPY.address, locale)}>
-                    <span className="text-base font-semibold text-charcoal-800 leading-snug">
-                      {t(settings.address, locale)}
-                    </span>
+                    {settings.mapUrl ? (
+                      <a
+                        href={settings.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-base font-semibold text-charcoal-800 leading-snug transition-colors hover:text-gold-600"
+                      >
+                        {t(settings.address, locale)}
+                      </a>
+                    ) : (
+                      <span className="text-base font-semibold text-charcoal-800 leading-snug">
+                        {t(settings.address, locale)}
+                      </span>
+                    )}
                   </ContactRow>
 
                   <ContactRow icon={Clock} label={t(INTERFACE_COPY.workingHours, locale)}>
@@ -81,6 +92,32 @@ export function ContactView({ locale, content }: { locale: AppLocale; content: S
                       {t(settings.workingHours, locale)}
                     </span>
                   </ContactRow>
+
+                  {settings.instagramUrl ? (
+                    <ContactRow icon={Instagram} label="Instagram">
+                      <a
+                        href={settings.instagramUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-base font-semibold text-charcoal-800 transition-colors hover:text-gold-600"
+                      >
+                        Instagram
+                      </a>
+                    </ContactRow>
+                  ) : null}
+
+                  {settings.facebookUrl ? (
+                    <ContactRow icon={Facebook} label="Facebook">
+                      <a
+                        href={settings.facebookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-base font-semibold text-charcoal-800 transition-colors hover:text-gold-600"
+                      >
+                        Facebook
+                      </a>
+                    </ContactRow>
+                  ) : null}
                 </div>
 
                 {/* أزرار الاتصال التفاعلية */}

@@ -34,6 +34,16 @@ export function AboutView({ locale, content }: { locale: AppLocale; content: Sit
               <p className="text-base sm:text-lg leading-relaxed text-charcoal-800 font-medium whitespace-pre-line">
                 {t(page.body, locale)}
               </p>
+              {t(page.mission, locale) ? (
+                <p className="mt-6 text-base sm:text-lg leading-relaxed text-charcoal-800 font-medium whitespace-pre-line">
+                  {t(page.mission, locale)}
+                </p>
+              ) : null}
+              {t(page.vision, locale) ? (
+                <p className="mt-4 text-base sm:text-lg leading-relaxed text-charcoal-800 font-medium whitespace-pre-line">
+                  {t(page.vision, locale)}
+                </p>
+              ) : null}
 
               {/* شريط الإضاءة الذهبي السفلي */}
               <div className="absolute bottom-0 left-0 right-0 h-1 w-0 rounded-b-2xl bg-gradient-to-r from-gold-400 to-gold-600 transition-all duration-500 group-hover:w-full" />

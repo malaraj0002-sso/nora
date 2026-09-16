@@ -1,7 +1,9 @@
 import { Quote, Star } from 'lucide-react';
+import Image from 'next/image';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
+import { mediaSrc } from '@/lib/content/media';
 import type { SiteContent } from '@/lib/content/types';
 import { t } from '@/lib/i18n/locale';
 
@@ -41,12 +43,21 @@ export function TestimonialsView({ locale, content }: { locale: AppLocale; conte
 
                 {/* معلومات العميل والمشروع */}
                 <div className="mt-6 pt-4 border-t border-gold-100/80">
-                  <p className="font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
-                    {item.name}
-                  </p>
-                  <p className="text-xs font-semibold text-gold-600/90 mt-0.5">
-                    {t(item.project, locale)}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    {item.image ? (
+                      <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-gold-200">
+                        <Image src={mediaSrc(item.image)} alt={item.name} fill className="object-cover" sizes="40px" />
+                      </span>
+                    ) : null}
+                    <div className="min-w-0">
+                      <p className="font-bold text-charcoal-900 transition-colors duration-300 group-hover:text-gold-600">
+                        {item.name}
+                      </p>
+                      <p className="text-xs font-semibold text-gold-600/90 mt-0.5">
+                        {t(item.project, locale)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* شريط التوهج الذهبي السفلي */}

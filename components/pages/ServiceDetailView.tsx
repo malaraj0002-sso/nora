@@ -40,6 +40,12 @@ export function ServiceDetailView({
                 <span>{t(INTERFACE_COPY.serviceFeatures, locale)}</span>
               </div>
 
+              {t(service.body, locale) ? (
+                <p className="mb-8 text-base leading-relaxed text-charcoal-700 whitespace-pre-line">
+                  {t(service.body, locale)}
+                </p>
+              ) : null}
+
               {/* قائمة المميزات الفاخرة */}
               <ul className="grid gap-4 sm:grid-cols-2">
                 {service.features.map((f, index) => (

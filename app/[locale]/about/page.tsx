@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { loadLocalePage } from '@/lib/i18n/loadPage';
 import { t } from '@/lib/i18n/locale';
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
-import { brandedTitle, buildPageMetadata } from '@/lib/seo/metadata';
+import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateMetadata({
   params,
@@ -12,12 +12,14 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale, content } = await loadLocalePage(params);
-  return buildPageMetadata({
+  return resolveCmsSeo({
     locale,
     path: '/about',
-    title: brandedTitle(t(content.about.title, locale), content.settings.brandName),
-    description: t(content.about.subtitle, locale),
-    image: content.about.image,
+    brand: content.settings.brandName,
+    seo: content.about.seo,
+    fallbackTitle: t(content.about.title, locale),
+    fallbackDescription: t(content.about.subtitle, locale),
+    fallbackImage: content.about.image,
   });
 }
 

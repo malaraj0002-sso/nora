@@ -29,6 +29,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
 import { getWhatsAppLink } from '@/lib/contact';
 import type { SiteContent } from '@/lib/content/types';
+import { takeForHome } from '@/lib/content/featured';
 import { mediaSrc } from '@/lib/content/media';
 import { t } from '@/lib/i18n/locale';
 
@@ -38,10 +39,10 @@ export function HomeView({ locale, content }: { locale: AppLocale; content: Site
   const settings = content.settings;
 
   const whatsapp = getWhatsAppLink(settings.whatsappE164, t(settings.whatsappMessage, locale));
-  const services = content.services.filter((s) => s.visible).slice(0, 7);
-  const projects = content.projects.filter((p) => p.visible).slice(0, 6);
-  const materials = content.materials.filter((m) => m.visible).slice(0, 4);
-  const testimonials = content.testimonials.filter((x) => x.visible).slice(0, 3);
+  const services = takeForHome(content.services, 7, home.featuredServiceSlugs, (s) => s.slug);
+  const projects = takeForHome(content.projects, 6, home.featuredProjectSlugs, (p) => p.slug);
+  const materials = takeForHome(content.materials, 4);
+  const testimonials = takeForHome(content.testimonials, 3);
 
   // أيقونات قسم "لماذا نحن"
   const whyIcons = [Sparkles, Layers, Ruler, PhoneCall, Wrench, ShieldCheck];

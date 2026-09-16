@@ -7,7 +7,7 @@ import { loadSlugPage } from '@/lib/i18n/loadPage';
 import { localeSlugStaticParams } from '@/lib/i18n/staticParams';
 import { t } from '@/lib/i18n/locale';
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
-import { brandedTitle, buildPageMetadata } from '@/lib/seo/metadata';
+import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateStaticParams() {
   const content = await getSiteContent();
@@ -22,12 +22,14 @@ export async function generateMetadata({
   const { locale, content, slug } = await loadSlugPage(params);
   const service = content.services.find((s) => s.visible && s.slug === slug);
   if (!service) return {};
-  return buildPageMetadata({
+  return resolveCmsSeo({
     locale,
     path: `/services/${slug}`,
-    title: brandedTitle(t(service.title, locale), content.settings.brandName),
-    description: t(service.description, locale),
-    image: service.image,
+    brand: content.settings.brandName,
+    seo: service.seo,
+    fallbackTitle: t(service.title, locale),
+    fallbackDescription: t(service.description, locale),
+    fallbackImage: service.image,
   });
 }
 

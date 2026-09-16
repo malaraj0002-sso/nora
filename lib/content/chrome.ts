@@ -1,4 +1,4 @@
-import type { AppLocale, ServiceSlug } from '@/lib/constants';
+import type { AppLocale } from '@/lib/constants';
 import type { NavLabels, SiteContent, SiteSettings } from '@/lib/content/types';
 import { t } from '@/lib/i18n/locale';
 
@@ -11,7 +11,7 @@ export type SiteChrome = {
   settings: SiteSettings;
   nav: NavLabels;
   ui: SiteContent['ui'][AppLocale];
-  services: { slug: ServiceSlug; title: string }[];
+  services: { slug: string; title: string }[];
   ctaSubtitle: string;
   showMaterials: boolean;
   showTestimonials: boolean;

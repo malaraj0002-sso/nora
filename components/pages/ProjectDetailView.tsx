@@ -39,6 +39,12 @@ export function ProjectDetailView({
         image={project.images[0]}
       />
 
+      {(t(project.location, locale) || project.completedAt) && (
+        <div className="container-luxury pt-8 text-sm font-semibold text-charcoal-600">
+          {[t(project.location, locale), project.completedAt].filter(Boolean).join(' · ')}
+        </div>
+      )}
+
       <section className="section-padding bg-warm-50/60 relative overflow-hidden">
         <div className="container-luxury space-y-12">
           

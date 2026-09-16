@@ -1,4 +1,4 @@
-import type { AppLocale, ProjectCategory, ServiceSlug } from '@/lib/constants';
+import type { AppLocale, ProjectCategory } from '@/lib/constants';
 
 /** Field-level localization shape used in seed + Sanity */
 export type LocalizedString = Record<AppLocale, string>;
@@ -19,6 +19,16 @@ export interface SiteSettings {
   qrUrl: string;
   seoTitle: LocalizedString;
   seoDescription: LocalizedString;
+  seoImage?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  mapUrl?: string;
+}
+
+export interface PageSeo {
+  title?: LocalizedString;
+  description?: LocalizedString;
+  image?: string;
 }
 
 export interface NavLabels {
@@ -72,6 +82,9 @@ export interface HomeContent {
   testimonialsEyebrow: LocalizedString;
   testimonialsTitle: LocalizedString;
   testimonialsSubtitle: LocalizedString;
+  featuredServiceSlugs?: string[];
+  featuredProjectSlugs?: string[];
+  seo?: PageSeo;
 }
 
 export interface PageHero {
@@ -83,8 +96,11 @@ export interface PageHero {
 
 export interface AboutContent extends PageHero {
   body: LocalizedString;
+  mission?: LocalizedString;
+  vision?: LocalizedString;
   valuesTitle: LocalizedString;
   values: { title: LocalizedString; desc: LocalizedString }[];
+  seo?: PageSeo;
 }
 
 export interface HowWeWorkContent extends PageHero {
@@ -92,16 +108,22 @@ export interface HowWeWorkContent extends PageHero {
     number: string;
     title: LocalizedString;
     description: LocalizedString;
+    image?: string;
   }[];
+  seo?: PageSeo;
 }
 
 export interface ServiceItem {
-  slug: ServiceSlug;
+  slug: string;
   title: LocalizedString;
   description: LocalizedString;
+  body?: LocalizedString;
   image: string;
+  gallery?: string[];
   features: LocalizedString[];
+  featured?: boolean;
   visible: boolean;
+  seo?: PageSeo;
 }
 
 export interface ProjectItem {
@@ -109,9 +131,13 @@ export interface ProjectItem {
   title: LocalizedString;
   description: LocalizedString;
   category: ProjectCategory;
+  location?: LocalizedString;
+  completedAt?: string;
   images: string[];
   materials: string[];
+  featured?: boolean;
   visible: boolean;
+  seo?: PageSeo;
 }
 
 export interface MaterialItem {
@@ -122,6 +148,7 @@ export interface MaterialItem {
   applications: LocalizedString;
   finishes: LocalizedString;
   image: string;
+  featured?: boolean;
   visible: boolean;
 }
 
@@ -131,6 +158,8 @@ export interface TestimonialItem {
   rating: number;
   review: LocalizedString;
   project: LocalizedString;
+  image?: string;
+  featured?: boolean;
   visible: boolean;
 }
 
@@ -143,7 +172,9 @@ export interface BlogPostItem {
   author: string;
   date: string;
   image: string;
+  featured?: boolean;
   visible: boolean;
+  seo?: PageSeo;
 }
 
 export interface FaqItem {
@@ -172,7 +203,9 @@ export interface SiteContent {
   home: HomeContent;
   about: AboutContent;
   howWeWork: HowWeWorkContent;
-  contactPage: PageHero;
+  contactPage: PageHero & { seo?: PageSeo };
+  faqPage: PageHero & { seo?: PageSeo };
+  blogPage: PageHero & { seo?: PageSeo };
   categoryLabels: Record<AppLocale, Record<ProjectCategory | 'all', string>>;
   services: ServiceItem[];
   projects: ProjectItem[];

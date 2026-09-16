@@ -39,6 +39,36 @@ function unauthorized() {
   return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 }
 
+const TYPE_TAGS: Record<string, string> = {
+  siteSettings: REVALIDATE_TAGS.siteSettings,
+  homePage: REVALIDATE_TAGS.home,
+  aboutPage: REVALIDATE_TAGS.pages,
+  howWeWorkPage: REVALIDATE_TAGS.pages,
+  contactPage: REVALIDATE_TAGS.pages,
+  faqPage: REVALIDATE_TAGS.pages,
+  blogPage: REVALIDATE_TAGS.pages,
+  uiLabels: REVALIDATE_TAGS.all,
+  service: REVALIDATE_TAGS.services,
+  project: REVALIDATE_TAGS.projects,
+  material: REVALIDATE_TAGS.materials,
+  testimonial: REVALIDATE_TAGS.testimonials,
+  blogPost: REVALIDATE_TAGS.blog,
+  faqItem: REVALIDATE_TAGS.faq,
+};
+
+async function tagsFromBody(request: Request): Promise<string[]> {
+  const tags = new Set<string>(Object.values(REVALIDATE_TAGS));
+  try {
+    const body = (await request.clone().json()) as { _type?: unknown };
+    if (typeof body?._type === 'string' && TYPE_TAGS[body._type]) {
+      tags.add(TYPE_TAGS[body._type]);
+    }
+  } catch {
+    /* empty or non-JSON webhook body — revalidate everything */
+  }
+  return [...tags];
+}
+
 /**
  * Sanity webhook target: POST with header `x-revalidate-secret`.
  * Empty or missing SANITY_REVALIDATE_SECRET rejects every request (fail closed).
@@ -59,12 +89,14 @@ export async function POST(request: Request) {
     return unauthorized();
   }
 
+  const extraTags = await tagsFromBody(request);
+
   revalidateTag(REVALIDATE_TAGS.all);
-  for (const tag of Object.values(REVALIDATE_TAGS)) {
+  for (const tag of extraTags) {
     revalidateTag(tag);
   }
 
-  return NextResponse.json({ revalidated: true, now: Date.now() });
+  return NextResponse.json({ revalidated: true, tags: extraTags, now: Date.now() });
 }
 
 export function GET() {

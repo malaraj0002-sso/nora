@@ -8,10 +8,8 @@ import { fetchBlogPostContent, fetchSanityContent } from '@/lib/sanity/fetch';
 
 /**
  * Single entry for all public pages.
- * Prefer Sanity when configured; otherwise (or on fetch failure) use seeded content
- * so the marketing site never ships empty.
- *
- * Wrapped in React.cache() so layout + generateMetadata share one result per request.
+ * Sanity is the primary source when configured.
+ * Seed is used only when Sanity is unset or the fetch fails.
  */
 export const getSiteContent = cache(async (): Promise<SiteContent> => {
   if (!isSanityConfigured()) {

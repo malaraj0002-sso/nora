@@ -21,7 +21,7 @@ export const viewport: Viewport = {
  */
 export default function StudioLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="he" dir="rtl">
       <body style={{ margin: 0 }}>{children}</body>
     </html>
   );

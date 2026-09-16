@@ -10,16 +10,18 @@ import { INTERFACE_COPY } from '@/lib/i18n/interfaceCopy';
 import { t } from '@/lib/i18n/locale';
 
 export function BlogView({ locale, content }: { locale: AppLocale; content: SiteContent }) {
-  const posts = content.blogPosts.filter((b) => b.visible);
+  const posts = [...content.blogPosts.filter((b) => b.visible)].sort(
+    (a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)),
+  );
   const nav = content.nav[locale];
 
   return (
     <>
       <PageHero
-        eyebrow={nav.blog}
-        title={nav.blog}
-        subtitle=""
-        image={posts[0]?.image}
+        eyebrow={t(content.blogPage.eyebrow, locale) || nav.blog}
+        title={t(content.blogPage.title, locale) || nav.blog}
+        subtitle={t(content.blogPage.subtitle, locale)}
+        image={content.blogPage.image || posts[0]?.image}
       />
 
       <section className="section-padding bg-warm-50/60 relative overflow-hidden">

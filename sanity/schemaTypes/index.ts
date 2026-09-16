@@ -1,7 +1,7 @@
 import { localeString, localeText } from './localeString';
 import { siteSettings } from './siteSettings';
 import { homePage } from './homePage';
-import { aboutPage, howWeWorkPage, contactPage, uiLabels } from './pages';
+import { aboutPage, howWeWorkPage, contactPage, faqPage, blogPage, uiLabels } from './pages';
 import { service } from './service';
 import { project } from './project';
 import { material } from './material';
@@ -17,6 +17,8 @@ export const schemaTypes = [
   aboutPage,
   howWeWorkPage,
   contactPage,
+  faqPage,
+  blogPage,
   uiLabels,
   service,
   project,

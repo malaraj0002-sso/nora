@@ -1,7 +1,9 @@
 import { Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import { PageHero } from '@/components/ui/PageHero';
 import { Reveal } from '@/components/ui/Reveal';
 import type { AppLocale } from '@/lib/constants';
+import { mediaSrc } from '@/lib/content/media';
 import type { SiteContent } from '@/lib/content/types';
 import { t } from '@/lib/i18n/locale';
 
@@ -29,6 +31,17 @@ export function HowWeWorkView({ locale, content }: { locale: AppLocale; content:
                 </span>
 
                 <div className="relative z-10">
+                  {step.image ? (
+                    <div className="relative mb-4 h-28 w-full overflow-hidden rounded-xl bg-charcoal-900">
+                      <Image
+                        src={mediaSrc(step.image)}
+                        alt={t(step.title, locale)}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width:768px) 100vw, 25vw"
+                      />
+                    </div>
+                  ) : null}
                   {/* شارة الخطوة مع الأيقونة */}
                   <div className="flex items-center justify-between mb-4">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-200/80 bg-gold-50/80 px-3 py-1 text-xs font-bold text-gold-600 backdrop-blur-sm">
