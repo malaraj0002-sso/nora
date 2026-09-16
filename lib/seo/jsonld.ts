@@ -1,7 +1,11 @@
-import { SITE_URL, type AppLocale } from '@/lib/constants';
+import { SERVICE_SLUGS, SITE_URL, type AppLocale, type ServiceSlug } from '@/lib/constants';
 import type { SiteContent } from '@/lib/content/types';
 import { t } from '@/lib/i18n/locale';
 import { absoluteUrl, toAbsoluteAsset } from '@/lib/seo/urls';
+
+export function isAllowedServiceSlug(slug: string): slug is ServiceSlug {
+  return (SERVICE_SLUGS as readonly string[]).includes(slug);
+}
 
 /**
  * CMS copy can include `</script>` / U+2028 and break out of JSON-LD.
@@ -115,5 +119,32 @@ export function articleJsonLd({
     datePublished: date || undefined,
     author: { '@type': 'Organization', name: author },
     publisher: { '@id': `${SITE_URL}/#business` },
+  };
+}
+
+export function serviceJsonLd({
+  locale,
+  slug,
+  name,
+  description,
+  image,
+}: {
+  locale: AppLocale;
+  slug: ServiceSlug;
+  name: string;
+  description: string;
+  image?: string;
+}) {
+  const url = absoluteUrl(locale, `/services/${slug}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${url}#service`,
+    name,
+    description,
+    url,
+    image: toAbsoluteAsset(image),
+    inLanguage: locale,
+    provider: { '@id': `${SITE_URL}/#business` },
   };
 }

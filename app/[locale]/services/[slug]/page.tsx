@@ -6,7 +6,7 @@ import { getSiteContent } from '@/lib/content/getContent';
 import { loadSlugPage } from '@/lib/i18n/loadPage';
 import { localeSlugStaticParams } from '@/lib/i18n/staticParams';
 import { t } from '@/lib/i18n/locale';
-import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
+import { breadcrumbJsonLd, isAllowedServiceSlug, serviceJsonLd } from '@/lib/seo/jsonld';
 import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateStaticParams() {
@@ -50,6 +50,17 @@ export default async function Page({
           { name: t(service.title, locale), path: `/services/${slug}` },
         ])}
       />
+      {isAllowedServiceSlug(slug) ? (
+        <JsonLd
+          data={serviceJsonLd({
+            locale,
+            slug,
+            name: t(service.title, locale),
+            description: t(service.description, locale),
+            image: service.image,
+          })}
+        />
+      ) : null}
       <ServiceDetailView locale={locale} content={content} slug={slug} />
     </>
   );
