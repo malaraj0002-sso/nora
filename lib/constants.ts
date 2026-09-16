@@ -18,20 +18,28 @@ export const LOCALE_META: Record<
   ru: { label: 'Русский', dir: 'ltr', htmlLang: 'ru' },
 };
 
+/** Production canonical origin — always www, never the apex host. */
+export const CANONICAL_ORIGIN = 'https://www.officialnoragroup.com';
+
 function publicSiteUrl(): string {
-  const fallback = 'https://officialnoragroup.com';
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (!raw) return fallback;
+  if (!raw) return CANONICAL_ORIGIN;
   try {
     const url = new URL(raw);
     const host = url.hostname.toLowerCase();
     const local = host === 'localhost' || host === '127.0.0.1';
-    if (url.protocol === 'https:') return url.origin;
-    if (url.protocol === 'http:' && local) return url.origin;
+    if (local && (url.protocol === 'http:' || url.protocol === 'https:')) {
+      return url.origin;
+    }
+    if (url.protocol !== 'https:') return CANONICAL_ORIGIN;
+    if (host === 'officialnoragroup.com' || host === 'www.officialnoragroup.com') {
+      return CANONICAL_ORIGIN;
+    }
+    return url.origin;
   } catch {
     /* invalid NEXT_PUBLIC_SITE_URL */
   }
-  return fallback;
+  return CANONICAL_ORIGIN;
 }
 
 export const SITE_URL = publicSiteUrl();
@@ -43,7 +51,7 @@ export const CONTACT_DEFAULTS = {
   phoneTel: '+972524659510',
   whatsappE164: '972524659510',
   email: 'official.noragroup@gmail.com',
-  website: 'https://officialnoragroup.com',
+  website: 'https://www.officialnoragroup.com',
   logoPath: '/logo.png',
   logoDarkPath: '/logo.png',
   qrPath: '/qr.jpg',

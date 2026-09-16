@@ -15,10 +15,17 @@ function asLocale(value: Partial<LocalizedString> | undefined, fallback: Localiz
   };
 }
 
-const FETCH_OPTS = (tags: string[]) =>
-  process.env.NODE_ENV === 'development'
-    ? { cache: 'no-store' as const, next: { tags } }
-    : { next: { tags, revalidate: 3600 as const } };
+const FETCH_TIMEOUT_MS = 8_000;
+
+const FETCH_OPTS = (tags: string[]) => {
+  const signal =
+    typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+      ? AbortSignal.timeout(FETCH_TIMEOUT_MS)
+      : undefined;
+  return process.env.NODE_ENV === 'development'
+    ? { cache: 'no-store' as const, next: { tags }, signal }
+    : { next: { tags, revalidate: 3600 as const }, signal };
+};
 
 function settled<T>(result: PromiseSettledResult<T>, label: string): T | null {
   if (result.status === 'fulfilled') return result.value;

@@ -6,10 +6,22 @@ import { isSanityConfigured } from '@/lib/sanity/env';
 import { isSafeSlug } from '@/lib/i18n/locale';
 import { fetchBlogPostContent, fetchSanityContent } from '@/lib/sanity/fetch';
 
+const SANITY_TIMEOUT_MS = 10_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 /**
  * Single entry for all public pages.
  * Sanity is the primary source when configured.
- * Seed is used only when Sanity is unset or the fetch fails.
+ * Seed is used only when Sanity is unset, times out, or the fetch fails.
  */
 export const getSiteContent = cache(async (): Promise<SiteContent> => {
   if (!isSanityConfigured()) {
@@ -17,7 +29,11 @@ export const getSiteContent = cache(async (): Promise<SiteContent> => {
   }
 
   try {
-    const fromCms = await fetchSanityContent();
+    const fromCms = await withTimeout(
+      fetchSanityContent(),
+      SANITY_TIMEOUT_MS,
+      '[getSiteContent] Sanity fetch',
+    );
     return fromCms ?? seedContent;
   } catch {
     console.error('[getSiteContent] Sanity fetch failed; using seed fallback');
