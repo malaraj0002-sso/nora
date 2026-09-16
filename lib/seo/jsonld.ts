@@ -18,6 +18,7 @@ export function safeJsonLd(data: unknown): string {
 export function localBusinessGraph(content: SiteContent, locale: AppLocale) {
   const { settings } = content;
   const logo = toAbsoluteAsset(settings.logoUrl) ?? `${SITE_URL}/logo.png`;
+  const description = t(settings.seoDescription, locale) || t(settings.tagline, locale);
 
   return {
     '@context': 'https://schema.org',
@@ -30,6 +31,8 @@ export function localBusinessGraph(content: SiteContent, locale: AppLocale) {
         telephone: settings.phoneTel,
         email: settings.email,
         image: logo,
+        logo,
+        description,
         address: {
           '@type': 'PostalAddress',
           addressLocality: t(settings.address, locale),
@@ -106,6 +109,7 @@ export function articleJsonLd({
     '@type': 'Article',
     headline: title,
     description,
+    inLanguage: locale,
     mainEntityOfPage: absoluteUrl(locale, path),
     image: toAbsoluteAsset(image),
     datePublished: date || undefined,

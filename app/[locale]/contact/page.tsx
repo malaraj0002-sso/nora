@@ -3,7 +3,7 @@ import { ContactView } from '@/components/pages/ContactView';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { loadLocalePage } from '@/lib/i18n/loadPage';
 import { t } from '@/lib/i18n/locale';
-import { breadcrumbJsonLd } from '@/lib/seo/jsonld';
+import { breadcrumbJsonLd, localBusinessGraph } from '@/lib/seo/jsonld';
 import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateMetadata({
@@ -27,6 +27,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const { locale, content } = await loadLocalePage(params);
   return (
     <>
+      <JsonLd data={localBusinessGraph(content, locale)} />
       <JsonLd
         data={breadcrumbJsonLd(locale, [
           { name: content.nav[locale].home, path: '/' },

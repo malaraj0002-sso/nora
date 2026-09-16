@@ -6,7 +6,7 @@ import { getBlogPost, getSiteContent } from '@/lib/content/getContent';
 import { loadSlugPage } from '@/lib/i18n/loadPage';
 import { localeSlugStaticParams } from '@/lib/i18n/staticParams';
 import { t } from '@/lib/i18n/locale';
-import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonld';
+import { articleJsonLd, breadcrumbJsonLd, localBusinessGraph } from '@/lib/seo/jsonld';
 import { resolveCmsSeo } from '@/lib/seo/cms';
 
 export async function generateStaticParams() {
@@ -52,6 +52,7 @@ export default async function Page({
           { name: t(post.title, locale), path },
         ])}
       />
+      <JsonLd data={localBusinessGraph(content, locale)} />
       <JsonLd
         data={articleJsonLd({
           locale,
