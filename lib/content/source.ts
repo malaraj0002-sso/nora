@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Server-only content repository switch.
  * Never expose via NEXT_PUBLIC_* — the browser must not choose the CMS.

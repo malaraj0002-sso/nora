@@ -687,6 +687,7 @@ model Service {
   /// custom-furniture, offices, commercial. App + future DB trigger must
   /// refuse DELETE and slug UPDATE when true. Do not insert those rows in Phase 1.
   isLocked        Boolean                @default(false) @map("is_locked")
+  publishedAt     DateTime?              @map("published_at")
   seoImageMediaId String?                @map("seo_image_media_id")
   seoImageMedia   Media?                 @relation("ServiceSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
   createdAt       DateTime               @default(now()) @map("created_at")
@@ -760,6 +761,7 @@ model Project {
   visible         Boolean                 @default(true)
   featured        Boolean                 @default(false)
   status          PublishStatus           @default(draft)
+  publishedAt     DateTime?               @map("published_at")
   seoImageMediaId String?                 @map("seo_image_media_id")
   seoImageMedia   Media?                  @relation("ProjectSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
   createdAt       DateTime                @default(now()) @map("created_at")
@@ -818,6 +820,7 @@ model Material {
   visible      Boolean                 @default(true)
   featured     Boolean                 @default(false)
   status       PublishStatus           @default(draft)
+  publishedAt  DateTime?               @map("published_at")
   imageMediaId String?                 @map("image_media_id")
   imageMedia   Media?                  @relation("MaterialImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
   createdAt    DateTime                @default(now()) @map("created_at")
@@ -853,6 +856,7 @@ model Testimonial {
   visible      Boolean                    @default(true)
   featured     Boolean                    @default(false)
   status       PublishStatus              @default(draft)
+  publishedAt  DateTime?                  @map("published_at")
   imageMediaId String?                    @map("image_media_id")
   imageMedia   Media?                     @relation("TestimonialImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
   createdAt    DateTime                   @default(now()) @map("created_at")
@@ -881,6 +885,7 @@ model FaqItem {
   sortOrder    Int                     @default(0) @map("sort_order")
   visible      Boolean                 @default(true)
   status       PublishStatus           @default(draft)
+  publishedAt  DateTime?               @map("published_at")
   createdAt    DateTime                @default(now()) @map("created_at")
   updatedAt    DateTime                @updatedAt @map("updated_at")
   translations FaqItemTranslation[]
@@ -911,6 +916,7 @@ model BlogPost {
   visible         Boolean                @default(true)
   featured        Boolean                @default(false)
   status          PublishStatus          @default(draft)
+  publishedAt     DateTime?              @map("published_at")
   imageMediaId    String?                @map("image_media_id")
   imageMedia      Media?                 @relation("BlogPostImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
   seoImageMediaId String?                @map("seo_image_media_id")

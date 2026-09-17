@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { seedContent } from '@/lib/content/seed';
 import { getContentSource } from '@/lib/content/source';
 import type { BlogPostItem, LocalizedString, SiteContent } from '@/lib/content/types';
