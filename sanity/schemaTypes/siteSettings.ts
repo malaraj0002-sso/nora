@@ -1,0 +1,115 @@
+import { defineField, defineType } from 'sanity';
+import { CogIcon } from '@sanity/icons';
+import { seoFields } from './fields';
+
+export const siteSettings = defineType({
+  name: 'siteSettings',
+  title: 'הגדרות האתר',
+  type: 'document',
+  icon: CogIcon,
+  groups: [
+    { name: 'brand', title: 'מותג', default: true },
+    { name: 'contact', title: 'יצירת קשר' },
+    { name: 'social', title: 'רשתות חברתיות' },
+    { name: 'seo', title: 'SEO' },
+  ],
+  fields: [
+    defineField({
+      name: 'brandName',
+      title: 'שם המותג',
+      type: 'string',
+      initialValue: 'Nora Group',
+      group: 'brand',
+      validation: (R) => R.required(),
+    }),
+    defineField({ name: 'tagline', title: 'סלוגן', type: 'localeString', group: 'brand' }),
+    defineField({
+      name: 'pillars',
+      title: 'שורת עמוד הבית (מעל הכותרת)',
+      type: 'localeString',
+      group: 'brand',
+    }),
+    defineField({
+      name: 'logo',
+      title: 'לוגו (רקע בהיר)',
+      type: 'image',
+      group: 'brand',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'logoDark',
+      title: 'לוגו (רקע כהה / פוטר)',
+      type: 'image',
+      group: 'brand',
+      options: { hotspot: true },
+    }),
+    defineField({
+      name: 'phoneDisplay',
+      title: 'טלפון לתצוגה',
+      type: 'string',
+      description: 'לדוגמה: 052-465-9510',
+      group: 'contact',
+      validation: (R) => R.required(),
+    }),
+    defineField({
+      name: 'phoneTel',
+      title: 'טלפון ללחיצה (E.164)',
+      type: 'string',
+      description: 'לדוגמה: +972524659510',
+      group: 'contact',
+      validation: (R) => R.required(),
+    }),
+    defineField({
+      name: 'whatsappE164',
+      title: 'וואטסאפ (ספרות בלבד)',
+      type: 'string',
+      description: 'לדוגמה: 972524659510',
+      group: 'contact',
+      validation: (R) => R.required(),
+    }),
+    defineField({
+      name: 'email',
+      title: 'אימייל',
+      type: 'string',
+      group: 'contact',
+      validation: (R) => R.required().email(),
+    }),
+    defineField({ name: 'address', title: 'כתובת', type: 'localeString', group: 'contact' }),
+    defineField({ name: 'workingHours', title: 'שעות פעילות', type: 'localeString', group: 'contact' }),
+    defineField({
+      name: 'whatsappMessage',
+      title: 'הודעת וואטסאפ כברירת מחדל',
+      type: 'localeText',
+      group: 'contact',
+    }),
+    defineField({
+      name: 'contactQr',
+      title: 'קוד QR (עמוד יצירת קשר)',
+      type: 'image',
+      group: 'contact',
+    }),
+    defineField({
+      name: 'mapUrl',
+      title: 'קישור למפה',
+      type: 'url',
+      group: 'contact',
+      description: 'אופציונלי. Google Maps או Waze. לא מוצג אם ריק.',
+    }),
+    defineField({
+      name: 'instagramUrl',
+      title: 'Instagram',
+      type: 'url',
+      group: 'social',
+    }),
+    defineField({
+      name: 'facebookUrl',
+      title: 'Facebook',
+      type: 'url',
+      group: 'social',
+    }),
+    ...seoFields('seo'),
+  ],
+  preview: {
+    prepare: () => ({ title: 'הגדרות האתר' }),
+  },
+});

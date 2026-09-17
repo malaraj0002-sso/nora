@@ -1,0 +1,111 @@
+import { defineField, defineType } from 'sanity';
+import { HomeIcon } from '@sanity/icons';
+import { seoFields } from './fields';
+
+export const homePage = defineType({
+  name: 'homePage',
+  title: 'דף הבית',
+  type: 'document',
+  icon: HomeIcon,
+  groups: [
+    { name: 'hero', title: 'הירו', default: true },
+    { name: 'intro', title: 'מבוא' },
+    { name: 'why', title: 'למה אנחנו' },
+    { name: 'sections', title: 'כותרות מקטעים' },
+    { name: 'featured', title: 'תוכן מומלץ' },
+    { name: 'cta', title: 'קריאה ליצירת קשר' },
+    { name: 'seo', title: 'SEO' },
+  ],
+  fields: [
+    defineField({ name: 'heroTitle', title: 'כותרת ראשית', type: 'localeString', group: 'hero' }),
+    defineField({
+      name: 'heroSubtitle',
+      title: 'תת-כותרת / תיאור',
+      type: 'localeText',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroImages',
+      title: 'תמונות הירו',
+      type: 'array',
+      group: 'hero',
+      of: [{ type: 'image', options: { hotspot: true } }],
+      description: 'סליידר. כפתורי ההירו (וואטסאפ / צפייה בעבודות) מגיעים מתוויות הניווט.',
+    }),
+    defineField({ name: 'introEyebrow', title: 'מבוא — שורה עליונה', type: 'localeString', group: 'intro' }),
+    defineField({ name: 'introTitle', title: 'מבוא — כותרת', type: 'localeString', group: 'intro' }),
+    defineField({ name: 'introDescription', title: 'מבוא — תיאור', type: 'localeText', group: 'intro' }),
+    defineField({
+      name: 'introFeatures',
+      title: 'מבוא — כרטיסים',
+      type: 'array',
+      group: 'intro',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', type: 'localeString', title: 'כותרת' },
+            { name: 'desc', type: 'localeText', title: 'תיאור' },
+          ],
+          preview: { select: { title: 'title.he' } },
+        },
+      ],
+    }),
+    defineField({ name: 'whyEyebrow', title: 'למה אנחנו — שורה עליונה', type: 'localeString', group: 'why' }),
+    defineField({ name: 'whyTitle', title: 'למה אנחנו — כותרת', type: 'localeString', group: 'why' }),
+    defineField({ name: 'whySubtitle', title: 'למה אנחנו — תת-כותרת', type: 'localeText', group: 'why' }),
+    defineField({
+      name: 'whyItems',
+      title: 'למה אנחנו — פריטים',
+      type: 'array',
+      group: 'why',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', type: 'localeString', title: 'כותרת' },
+            { name: 'desc', type: 'localeText', title: 'תיאור' },
+          ],
+          preview: { select: { title: 'title.he' } },
+        },
+      ],
+    }),
+    defineField({ name: 'processEyebrow', type: 'localeString', title: 'תהליך — שורה עליונה', group: 'sections' }),
+    defineField({ name: 'processTitle', type: 'localeString', title: 'תהליך — כותרת', group: 'sections' }),
+    defineField({ name: 'processSubtitle', type: 'localeText', title: 'תהליך — תת-כותרת', group: 'sections' }),
+    defineField({ name: 'servicesEyebrow', type: 'localeString', title: 'שירותים — שורה עליונה', group: 'sections' }),
+    defineField({ name: 'servicesTitle', type: 'localeString', title: 'שירותים — כותרת', group: 'sections' }),
+    defineField({ name: 'servicesSubtitle', type: 'localeText', title: 'שירותים — תת-כותרת', group: 'sections' }),
+    defineField({ name: 'projectsEyebrow', type: 'localeString', title: 'פרויקטים — שורה עליונה', group: 'sections' }),
+    defineField({ name: 'projectsTitle', type: 'localeString', title: 'פרויקטים — כותרת', group: 'sections' }),
+    defineField({ name: 'projectsSubtitle', type: 'localeText', title: 'פרויקטים — תת-כותרת', group: 'sections' }),
+    defineField({ name: 'materialsEyebrow', type: 'localeString', title: 'חומרים — שורה עליונה', group: 'sections' }),
+    defineField({ name: 'materialsTitle', type: 'localeString', title: 'חומרים — כותרת', group: 'sections' }),
+    defineField({ name: 'materialsSubtitle', type: 'localeText', title: 'חומרים — תת-כותרת', group: 'sections' }),
+    defineField({ name: 'testimonialsEyebrow', type: 'localeString', title: 'המלצות — שורה עליונה', group: 'sections' }),
+    defineField({ name: 'testimonialsTitle', type: 'localeString', title: 'המלצות — כותרת', group: 'sections' }),
+    defineField({ name: 'testimonialsSubtitle', type: 'localeText', title: 'המלצות — תת-כותרת', group: 'sections' }),
+    defineField({
+      name: 'featuredServices',
+      title: 'שירותים בעמוד הבית',
+      type: 'array',
+      group: 'featured',
+      of: [{ type: 'reference', to: [{ type: 'service' }] }],
+      description: 'אם ריק, האתר מציג שירותים לפי סדר וסימון «מומלץ». אין ליצור שירותי דלתות.',
+    }),
+    defineField({
+      name: 'featuredProjects',
+      title: 'פרויקטים בעמוד הבית',
+      type: 'array',
+      group: 'featured',
+      of: [{ type: 'reference', to: [{ type: 'project' }] }],
+      description: 'אם ריק, האתר מציג פרויקטים לפי סדר וסימון «מומלץ».',
+    }),
+    defineField({ name: 'ctaTitle', type: 'localeString', title: 'CTA — כותרת', group: 'cta' }),
+    defineField({ name: 'ctaSubtitle', type: 'localeText', title: 'CTA — תת-כותרת', group: 'cta' }),
+    ...seoFields('seo'),
+  ],
+  preview: {
+    prepare: () => ({ title: 'דף הבית' }),
+  },
+});

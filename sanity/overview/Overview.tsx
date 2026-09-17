@@ -1,0 +1,302 @@
+'use client';
+
+import { useEffect, useState, type CSSProperties } from 'react';
+import {
+  CaseIcon,
+  CogIcon,
+  CommentIcon,
+  DocumentIcon,
+  EarthGlobeIcon,
+  HomeIcon,
+  ImagesIcon,
+  InfoOutlineIcon,
+  UsersIcon,
+} from '@sanity/icons';
+import { useClient, useTranslation } from 'sanity';
+import { useRouter } from 'sanity/router';
+import { apiVersion } from '../env';
+import { NORA_STUDIO_NS } from '../i18n/constants';
+
+type Counts = {
+  projects: number;
+  materials: number;
+  services: number;
+  posts: number;
+  testimonials: number;
+  slides: number;
+  faqs: number;
+};
+
+const EMPTY: Counts = {
+  projects: 0,
+  materials: 0,
+  services: 0,
+  posts: 0,
+  testimonials: 0,
+  slides: 0,
+  faqs: 0,
+};
+
+const GOLD = '#cda845';
+const INK = '#f7f4ea';
+const MUTED = 'rgba(247,244,234,0.62)';
+const CARD = '#181818';
+const LINE = 'rgba(205,168,69,0.28)';
+
+function published(type: string) {
+  return `count(*[_type == "${type}" && !(_id in path("drafts.**"))])`;
+}
+
+export function Overview() {
+  const client = useClient({ apiVersion });
+  const router = useRouter();
+  const { t } = useTranslation(NORA_STUDIO_NS);
+  const [counts, setCounts] = useState<Counts>(EMPTY);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    client
+      .fetch<{
+        projects: number;
+        materials: number;
+        services: number;
+        posts: number;
+        testimonials: number;
+        faqs: number;
+        slides: number;
+      }>(`{
+        "projects": ${published('project')},
+        "materials": ${published('material')},
+        "services": ${published('service')},
+        "posts": ${published('blogPost')},
+        "testimonials": ${published('testimonial')},
+        "faqs": ${published('faqItem')},
+        "slides": count(*[_id == "homePage"][0].heroImages)
+      }`)
+      .then((data) => {
+        if (!cancelled) {
+          setCounts({
+            projects: data.projects || 0,
+            materials: data.materials || 0,
+            services: data.services || 0,
+            posts: data.posts || 0,
+            testimonials: data.testimonials || 0,
+            faqs: data.faqs || 0,
+            slides: data.slides || 0,
+          });
+          setLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
+
+  function openDoc(type: string, id?: string) {
+    try {
+      if (id) {
+        router.navigateIntent('edit', { type, id });
+        return;
+      }
+      // navigateUrl() pushes a full pathname. Omitting /studio makes Sanity
+      // treat the URL as outside this workspace → "Workspace not found".
+      const structureRoot = router.resolvePathFromState({ tool: 'structure' });
+      router.navigateUrl({ path: `${structureRoot}/${type}` });
+    } catch {
+      window.location.assign(`/studio/structure/${type}`);
+    }
+  }
+
+  const stats: {
+    key: keyof Counts;
+    label: string;
+    icon: typeof HomeIcon;
+    onClick: () => void;
+  }[] = [
+    { key: 'projects', label: t('overview.stat.projects'), icon: ImagesIcon, onClick: () => openDoc('project') },
+    { key: 'materials', label: t('overview.stat.materials'), icon: EarthGlobeIcon, onClick: () => openDoc('material') },
+    { key: 'services', label: t('overview.stat.services'), icon: CaseIcon, onClick: () => openDoc('service') },
+    { key: 'posts', label: t('overview.stat.posts'), icon: DocumentIcon, onClick: () => openDoc('blogPost') },
+    { key: 'testimonials', label: t('overview.stat.testimonials'), icon: CommentIcon, onClick: () => openDoc('testimonial') },
+    { key: 'slides', label: t('overview.stat.slides'), icon: ImagesIcon, onClick: () => openDoc('homePage', 'homePage') },
+  ];
+
+  const actions = [
+    { label: t('overview.action.settings'), icon: CogIcon, onClick: () => openDoc('siteSettings', 'siteSettings') },
+    { label: t('overview.action.home'), icon: HomeIcon, onClick: () => openDoc('homePage', 'homePage') },
+    { label: t('overview.action.about'), icon: InfoOutlineIcon, onClick: () => openDoc('aboutPage', 'aboutPage') },
+    { label: t('overview.action.projects'), icon: ImagesIcon, onClick: () => openDoc('project') },
+    { label: t('overview.action.services'), icon: CaseIcon, onClick: () => openDoc('service') },
+    { label: t('overview.action.contact'), icon: UsersIcon, onClick: () => openDoc('contactPage', 'contactPage') },
+  ];
+
+  return (
+    <div
+      style={{
+        minHeight: '100%',
+        padding: '2rem 1.5rem 3rem',
+        background: '#0c0c0c',
+        color: INK,
+        fontFamily: 'Noto Sans Hebrew, Cairo, system-ui, sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <p style={{ margin: 0, color: GOLD, fontSize: 12, letterSpacing: '0.14em', fontWeight: 700 }}>
+          NORA GROUP
+        </p>
+        <h1 style={{ margin: '0.35rem 0 0', fontSize: 32, fontWeight: 700 }}>{t('overview.title')}</h1>
+        <p style={{ margin: '0.6rem 0 0', color: MUTED, maxWidth: 620, lineHeight: 1.7 }}>
+          {t('overview.intro')}
+        </p>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+            gap: 12,
+            marginTop: 28,
+          }}
+        >
+          {stats.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button key={item.key} type="button" onClick={item.onClick} style={cardButton}>
+                <Icon style={{ width: 22, height: 22, color: GOLD }} />
+                <span style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
+                  {loaded ? counts[item.key] : '—'}
+                </span>
+                <span style={{ color: MUTED, fontSize: 13 }}>{item.label}</span>
+                <span style={{ color: GOLD, fontSize: 11 }}>{t('overview.published')}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.4fr) minmax(240px, 0.8fr)',
+            gap: 16,
+            marginTop: 28,
+          }}
+          className="nora-overview-split"
+        >
+          <section style={panel}>
+            <h2 style={panelTitle}>{t('overview.shortcuts')}</h2>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                gap: 10,
+              }}
+            >
+              {actions.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.label} type="button" onClick={item.onClick} style={actionButton}>
+                    <Icon style={{ width: 20, height: 20, color: GOLD }} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section style={panel}>
+            <h2 style={panelTitle}>{t('overview.siteStatus')}</h2>
+            <StatusRow label={t('overview.brand')} value="Nora Group" />
+            <StatusRow label={t('overview.faqs')} value={loaded ? String(counts.faqs) : '—'} />
+            <StatusRow label={t('overview.testimonials')} value={loaded ? String(counts.testimonials) : '—'} />
+            <StatusRow icon={UsersIcon} label={t('overview.action.contact')} value={t('overview.contactValue')} />
+            <p style={{ margin: '1rem 0 0', color: MUTED, fontSize: 12, lineHeight: 1.6 }}>
+              {t('overview.afterPublish')}
+            </p>
+          </section>
+        </div>
+      </div>
+      <style>{`
+        @media (max-width: 800px) {
+          .nora-overview-split { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function StatusRow({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon?: typeof HomeIcon;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 12,
+        padding: '0.55rem 0',
+        borderBottom: `1px solid ${LINE}`,
+        fontSize: 13,
+      }}
+    >
+      <span style={{ color: MUTED, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        {Icon ? <Icon style={{ width: 14, height: 14, color: GOLD }} /> : null}
+        {label}
+      </span>
+      <span style={{ fontWeight: 600 }}>{value}</span>
+    </div>
+  );
+}
+
+const cardButton: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 8,
+  padding: '1.1rem 1rem',
+  background: CARD,
+  border: `1px solid ${LINE}`,
+  borderRadius: 14,
+  color: INK,
+  cursor: 'pointer',
+  textAlign: 'start',
+};
+
+const actionButton: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 8,
+  padding: '0.95rem 0.85rem',
+  background: '#121212',
+  border: `1px solid ${LINE}`,
+  borderRadius: 12,
+  color: INK,
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 600,
+  textAlign: 'start',
+};
+
+const panel: CSSProperties = {
+  background: CARD,
+  border: `1px solid ${LINE}`,
+  borderRadius: 16,
+  padding: '1.15rem 1.15rem 1.25rem',
+};
+
+const panelTitle: CSSProperties = {
+  margin: '0 0 1rem',
+  fontSize: 15,
+  fontWeight: 700,
+  color: GOLD,
+};

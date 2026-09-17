@@ -1,0 +1,40 @@
+import type { Metadata } from 'next';
+import { ContactView } from '@/components/pages/ContactView';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { loadLocalePage } from '@/lib/i18n/loadPage';
+import { t } from '@/lib/i18n/locale';
+import { breadcrumbJsonLd, localBusinessGraph } from '@/lib/seo/jsonld';
+import { resolveCmsSeo } from '@/lib/seo/cms';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale, content } = await loadLocalePage(params);
+  return resolveCmsSeo({
+    locale,
+    path: '/contact',
+    brand: content.settings.brandName,
+    seo: content.contactPage.seo,
+    fallbackTitle: t(content.contactPage.title, locale),
+    fallbackDescription: t(content.contactPage.subtitle, locale),
+    fallbackImage: content.contactPage.image,
+  });
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale, content } = await loadLocalePage(params);
+  return (
+    <>
+      <JsonLd data={localBusinessGraph(content, locale)} />
+      <JsonLd
+        data={breadcrumbJsonLd(locale, [
+          { name: content.nav[locale].home, path: '/' },
+          { name: content.nav[locale].contact, path: '/contact' },
+        ])}
+      />
+      <ContactView locale={locale} content={content} />
+    </>
+  );
+}
