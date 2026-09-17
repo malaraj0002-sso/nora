@@ -1,6 +1,7 @@
 /**
  * Phase 2 auth verification against local/staging PostgreSQL only.
  * Refuses to run if DATABASE_URL is missing or looks like production.
+ * Never disables users_protect_last_super_admin against a production-looking URL.
  */
 import { randomBytes } from 'node:crypto';
 import { RoleKey } from '@prisma/client';
@@ -31,6 +32,117 @@ import {
 } from '../lib/auth/users';
 import { requireLocalDatabaseUrl } from '../lib/db/assert-local';
 
+const HOSTED_PRODUCTION_MARKERS = [
+  'vercel',
+  'neon.tech',
+  'supabase',
+  'amazonaws',
+  'postgres.database.azure.com',
+  'officialnoragroup',
+  'vercel-storage',
+] as const;
+
+function looksLikeHostedProductionDatabase(url: string): boolean {
+  const lowered = url.toLowerCase();
+  return HOSTED_PRODUCTION_MARKERS.some((marker) => lowered.includes(marker));
+}
+
+function assertAuthVerifyDatabaseUrl(): { url: string; unpooled: string } {
+  const urls = requireLocalDatabaseUrl();
+  if (looksLikeHostedProductionDatabase(urls.url)) {
+    throw new Error(
+      'DATABASE_URL looks like a hosted production database and was refused. Auth verification will not run.',
+    );
+  }
+  if (looksLikeHostedProductionDatabase(urls.unpooled)) {
+    throw new Error(
+      'DATABASE_URL_UNPOOLED looks like a hosted production database and was refused. Auth verification will not run.',
+    );
+  }
+  return urls;
+}
+
+function allowDestructiveTriggerDisable(urls: { url: string; unpooled: string }): boolean {
+  if (
+    looksLikeHostedProductionDatabase(urls.url) ||
+    looksLikeHostedProductionDatabase(urls.unpooled)
+  ) {
+    return false;
+  }
+  if (process.env.NORA_AUTH_VERIFY_ALLOW_DESTRUCTIVE?.trim() !== 'true') {
+    return false;
+  }
+  // Flag is never enough on its own; local/staging was already verified by assertAuthVerifyDatabaseUrl.
+  return true;
+}
+
+async function cleanupCreatedUsers(
+  prisma: PrismaClient,
+  createdIds: string[],
+  allowTriggerDisable: boolean,
+): Promise<void> {
+  if (createdIds.length === 0) return;
+
+  await prisma.session.deleteMany({ where: { userId: { in: createdIds } } });
+  await prisma.passwordResetToken.deleteMany({ where: { userId: { in: createdIds } } });
+
+  const remaining = await prisma.user.findMany({
+    where: { id: { in: createdIds } },
+    include: { role: true },
+  });
+
+  const superAdminIds = remaining
+    .filter((user) => user.role.key === RoleKey.super_admin && user.isActive)
+    .map((user) => user.id);
+  const otherIds = remaining
+    .filter((user) => !(user.role.key === RoleKey.super_admin && user.isActive))
+    .map((user) => user.id);
+
+  if (otherIds.length > 0) {
+    await prisma.user.deleteMany({ where: { id: { in: otherIds } } });
+  }
+
+  for (const userId of superAdminIds) {
+    const otherActiveSuperAdmins = await prisma.user.count({
+      where: {
+        id: { not: userId },
+        isActive: true,
+        role: { key: RoleKey.super_admin },
+      },
+    });
+    if (otherActiveSuperAdmins >= 1) {
+      await prisma.user.delete({ where: { id: userId } });
+    }
+  }
+
+  const leftover = await prisma.user.findMany({
+    where: { id: { in: createdIds } },
+    select: { id: true },
+  });
+  if (leftover.length === 0) return;
+
+  if (!allowTriggerDisable) {
+    throw new Error(
+      'Test cleanup left the final active super_admin in place because users_protect_last_super_admin is respected. Set NORA_AUTH_VERIFY_ALLOW_DESTRUCTIVE=true only for a verified local/staging database if leftover test users must be deleted.',
+    );
+  }
+
+  console.warn(
+    'Temporarily disabling trigger users_protect_last_super_admin for local/staging test cleanup only.',
+  );
+  let disabled = false;
+  try {
+    await prisma.$executeRawUnsafe('ALTER TABLE users DISABLE TRIGGER users_protect_last_super_admin');
+    disabled = true;
+    await prisma.user.deleteMany({ where: { id: { in: leftover.map((row) => row.id) } } });
+  } finally {
+    if (disabled) {
+      await prisma.$executeRawUnsafe('ALTER TABLE users ENABLE TRIGGER users_protect_last_super_admin');
+      console.warn('Restored trigger users_protect_last_super_admin.');
+    }
+  }
+}
+
 type Check = { name: string; ok: boolean; detail?: string };
 
 const checks: Check[] = [];
@@ -54,7 +166,8 @@ function randomSecret(): string {
 }
 
 async function main() {
-  requireLocalDatabaseUrl();
+  const urls = assertAuthVerifyDatabaseUrl();
+  const allowTriggerDisable = allowDestructiveTriggerDisable(urls);
   const prisma = new PrismaClient();
   const createdIds: string[] = [];
 
@@ -296,22 +409,18 @@ async function main() {
     }
     record('application layer blocks deleting the final super_admin', lastDeleteBlocked);
   } finally {
+    let cleanupError: unknown;
     try {
-      await prisma.$executeRawUnsafe('ALTER TABLE users DISABLE TRIGGER users_protect_last_super_admin');
-    } catch {
-      /* trigger may not exist if verification failed before migrate extras */
-    }
-    if (createdIds.length > 0) {
-      await prisma.session.deleteMany({ where: { userId: { in: createdIds } } });
-      await prisma.passwordResetToken.deleteMany({ where: { userId: { in: createdIds } } });
-      await prisma.user.deleteMany({ where: { id: { in: createdIds } } });
-    }
-    try {
-      await prisma.$executeRawUnsafe('ALTER TABLE users ENABLE TRIGGER users_protect_last_super_admin');
-    } catch {
-      /* ignore */
+      await cleanupCreatedUsers(prisma, createdIds, allowTriggerDisable);
+    } catch (error) {
+      cleanupError = error;
+      const message = error instanceof Error ? error.message : 'Unknown cleanup error';
+      console.error(`Auth verify cleanup failed: ${message}`);
     }
     await prisma.$disconnect();
+    if (cleanupError) {
+      process.exitCode = 1;
+    }
   }
 
   const failed = checks.filter((item) => !item.ok);
