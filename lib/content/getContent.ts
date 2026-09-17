@@ -1,44 +1,16 @@
 import { cache } from 'react';
 import { LOCALES } from '@/lib/constants';
-import { seedContent } from '@/lib/content/seed';
+import { loadPublishedBlogBody, loadPublishedContent } from '@/lib/content/repository';
 import type { BlogPostItem, SiteContent } from '@/lib/content/types';
-import { isSanityConfigured } from '@/lib/sanity/env';
 import { isSafeSlug } from '@/lib/i18n/locale';
-import { fetchBlogPostContent, fetchSanityContent } from '@/lib/sanity/fetch';
-
-const SANITY_TIMEOUT_MS = 10_000;
-
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => {
-    if (timer) clearTimeout(timer);
-  });
-}
 
 /**
  * Single entry for all public pages.
- * Sanity is the primary source when configured.
- * Seed is used only when Sanity is unset, times out, or the fetch fails.
+ * CONTENT_SOURCE defaults to sanity. Seed is used only when the repository
+ * has no published document set (Sanity unset, timeout, or fetch failure).
  */
 export const getSiteContent = cache(async (): Promise<SiteContent> => {
-  if (!isSanityConfigured()) {
-    return seedContent;
-  }
-
-  try {
-    const fromCms = await withTimeout(
-      fetchSanityContent(),
-      SANITY_TIMEOUT_MS,
-      '[getSiteContent] Sanity fetch',
-    );
-    return fromCms ?? seedContent;
-  } catch {
-    console.error('[getSiteContent] Sanity fetch failed; using seed fallback');
-    return seedContent;
-  }
+  return loadPublishedContent();
 });
 
 export const getBlogPost = cache(async (slug: string): Promise<BlogPostItem | null> => {
@@ -51,12 +23,8 @@ export const getBlogPost = cache(async (slug: string): Promise<BlogPostItem | nu
   const hasBody = LOCALES.some((code) => post.content[code]?.trim());
   if (hasBody) return post;
 
-  try {
-    const body = await fetchBlogPostContent(slug);
-    if (body) return { ...post, content: body };
-  } catch {
-    console.error('[getBlogPost] body fetch failed; using excerpt');
-  }
+  const body = await loadPublishedBlogBody(slug);
+  if (body) return { ...post, content: body };
 
   return post;
 });

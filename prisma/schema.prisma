@@ -1,0 +1,943 @@
+// Nora Group — PostgreSQL schema.
+//
+// Phase 2 applies AUTH tables + empty content tables to local/staging only.
+// Never migrate production from this phase. Never insert CMS/content rows here.
+// Public website continues to read Sanity via getSiteContent() (CONTENT_SOURCE=sanity).
+//
+// This file models the future CMS so it can map 1:1 onto SiteContent
+// (lib/content/types.ts). Legal pages and the lazaCore "madeBy" string stay in code.
+// Image binaries are never stored here — only media metadata + public URLs.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum Locale {
+  he
+  ar
+  en
+  ru
+}
+
+enum RoleKey {
+  super_admin
+  admin
+  editor
+  translator
+  viewer
+}
+
+enum PublishStatus {
+  draft
+  published
+  archived
+}
+
+enum ProjectCategory {
+  kitchens
+  bedrooms
+  wardrobes
+  furniture
+  commercial
+}
+
+enum MediaPlacement {
+  primary
+  gallery
+}
+
+// ---------------------------------------------------------------------------
+// Auth — first-party sessions, Argon2id hashes (application layer, later).
+// One role per user. Sessions store token_hash only, never the raw cookie.
+// ---------------------------------------------------------------------------
+
+model Role {
+  id          String           @id @default(uuid())
+  key         RoleKey          @unique
+  name        String
+  permissions RolePermission[]
+  users       User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id            String               @id @default(uuid())
+  email         String               @unique
+  name          String
+  /// Argon2id hash. Never return this field from API or client modules.
+  passwordHash  String               @map("password_hash")
+  roleId        String               @map("role_id")
+  role          Role                 @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  isActive      Boolean              @default(true) @map("is_active")
+  lastLoginAt   DateTime?            @map("last_login_at")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+  sessions      Session[]
+  resetTokens   PasswordResetToken[]
+  auditLogs     AuditLog[]
+  uploadedMedia Media[]
+
+  @@index([roleId])
+  @@map("users")
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the session cookie value. Never store the raw token.
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  ip        String?
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, expiresAt])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_user_id")
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  /// JSON metadata. Application layer strips passwords, tokens, and secrets.
+  metadata   Json?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Media — object storage metadata only. No BYTEA / binaries.
+// ---------------------------------------------------------------------------
+
+model Media {
+  id           String             @id @default(uuid())
+  storageKey   String             @unique @map("storage_key")
+  publicUrl    String             @map("public_url")
+  mimeType     String             @map("mime_type")
+  byteSize     Int                @map("byte_size")
+  width        Int?
+  height       Int?
+  blurhash     String?
+  uploadedById String?            @map("uploaded_by")
+  uploadedBy   User?              @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  translations MediaTranslation[]
+
+  siteLogo            SiteSettings[] @relation("SiteLogo")
+  siteLogoDark        SiteSettings[] @relation("SiteLogoDark")
+  siteQr              SiteSettings[] @relation("SiteQr")
+  siteSeoImage        SiteSettings[] @relation("SiteSeoImage")
+  homeSeoImage        HomePage[]     @relation("HomeSeoImage")
+  heroSlides          HeroSlide[]
+  aboutImage          AboutPage[]    @relation("AboutImage")
+  aboutSeoImage       AboutPage[]    @relation("AboutSeoImage")
+  howWeWorkImage      HowWeWorkPage[] @relation("HowWeWorkImage")
+  howWeWorkSeoImage   HowWeWorkPage[] @relation("HowWeWorkSeoImage")
+  howWeWorkStepImages HowWeWorkStep[]
+  contactImage        ContactPage[]  @relation("ContactImage")
+  contactSeoImage     ContactPage[]  @relation("ContactSeoImage")
+  faqImage            FaqPage[]      @relation("FaqImage")
+  faqSeoImage         FaqPage[]      @relation("FaqSeoImage")
+  blogPageImage       BlogPage[]     @relation("BlogPageImage")
+  blogPageSeoImage    BlogPage[]     @relation("BlogPageSeoImage")
+  serviceImages       ServiceImage[]
+  serviceSeoImages    Service[]      @relation("ServiceSeoImage")
+  projectImages       ProjectImage[]
+  projectSeoImages    Project[]      @relation("ProjectSeoImage")
+  materialImages      Material[]     @relation("MaterialImage")
+  testimonialImages   Testimonial[]  @relation("TestimonialImage")
+  blogPostImages      BlogPost[]     @relation("BlogPostImage")
+  blogPostSeoImages   BlogPost[]     @relation("BlogPostSeoImage")
+
+  @@map("media")
+}
+
+model MediaTranslation {
+  id      String @id @default(uuid())
+  mediaId String @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  locale  Locale
+  alt     String @default("")
+
+  @@unique([mediaId, locale])
+  @@map("media_translations")
+}
+
+// ---------------------------------------------------------------------------
+// Site settings + chrome
+// ---------------------------------------------------------------------------
+
+model SiteSettings {
+  id              String                    @id @default("default")
+  brandName       String                    @map("brand_name")
+  phoneDisplay    String                    @map("phone_display")
+  phoneTel        String                    @map("phone_tel")
+  whatsappE164    String                    @map("whatsapp_e164")
+  email           String
+  instagramUrl    String?                   @map("instagram_url")
+  facebookUrl     String?                   @map("facebook_url")
+  mapUrl          String?                   @map("map_url")
+  logoMediaId     String?                   @map("logo_media_id")
+  logoMedia       Media?                    @relation("SiteLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  logoDarkMediaId String?                   @map("logo_dark_media_id")
+  logoDarkMedia   Media?                    @relation("SiteLogoDark", fields: [logoDarkMediaId], references: [id], onDelete: SetNull)
+  qrMediaId       String?                   @map("qr_media_id")
+  qrMedia         Media?                    @relation("SiteQr", fields: [qrMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                   @map("seo_image_media_id")
+  seoImageMedia   Media?                    @relation("SiteSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+  translations    SiteSettingsTranslation[]
+
+  @@map("site_settings")
+}
+
+model SiteSettingsTranslation {
+  id               String       @id @default(uuid())
+  siteSettingsId   String       @map("site_settings_id")
+  siteSettings     SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  locale           Locale
+  tagline          String       @default("")
+  pillars          String       @default("")
+  address          String       @default("")
+  workingHours     String       @default("") @map("working_hours")
+  whatsappMessage  String       @default("") @map("whatsapp_message")
+  seoTitle         String       @default("") @map("seo_title")
+  seoDescription   String       @default("") @map("seo_description")
+
+  @@unique([siteSettingsId, locale])
+  @@map("site_settings_translations")
+}
+
+model UiLabels {
+  id           String               @id @default("default")
+  translations UiLabelTranslation[]
+
+  @@map("ui_labels")
+}
+
+model UiLabelTranslation {
+  id               String   @id @default(uuid())
+  uiLabelsId       String   @map("ui_labels_id")
+  uiLabels         UiLabels @relation(fields: [uiLabelsId], references: [id], onDelete: Cascade)
+  locale           Locale
+  home             String   @default("")
+  about            String   @default("")
+  services         String   @default("")
+  projects         String   @default("")
+  materials        String   @default("")
+  howWeWork        String   @default("") @map("how_we_work")
+  testimonials     String   @default("")
+  blog             String   @default("")
+  faq              String   @default("")
+  contact          String   @default("")
+  callUs           String   @default("") @map("call_us")
+  whatsapp         String   @default("")
+  viewWork         String   @default("") @map("view_work")
+  learnMore        String   @default("") @map("learn_more")
+  viewAll          String   @default("") @map("view_all")
+  viewProject      String   @default("") @map("view_project")
+  readMore         String   @default("") @map("read_more")
+  backHome         String   @default("") @map("back_home")
+  all              String   @default("")
+  footerCta        String   @default("") @map("footer_cta")
+  footerTagline    String   @default("") @map("footer_tagline")
+  servicesTitle    String   @default("") @map("services_title")
+  navTitle         String   @default("") @map("nav_title")
+  contactTitle     String   @default("") @map("contact_title")
+  languagesTitle   String   @default("") @map("languages_title")
+  notFoundTitle    String   @default("") @map("not_found_title")
+  notFoundBody     String   @default("") @map("not_found_body")
+  relatedProjects  String   @default("") @map("related_projects")
+  allRightsReserved String  @default("") @map("all_rights_reserved")
+  demoNotice       String   @default("") @map("demo_notice")
+  privacy          String   @default("")
+  cookies          String   @default("")
+  terms            String   @default("")
+  cookieNotice     String   @default("") @map("cookie_notice")
+  cookieAccept     String   @default("") @map("cookie_accept")
+  legalTitle       String   @default("") @map("legal_title")
+  categoryAll      String   @default("") @map("category_all")
+  categoryKitchens String   @default("") @map("category_kitchens")
+  categoryBedrooms String   @default("") @map("category_bedrooms")
+  categoryWardrobes String  @default("") @map("category_wardrobes")
+  categoryFurniture String  @default("") @map("category_furniture")
+  categoryCommercial String @default("") @map("category_commercial")
+
+  @@unique([uiLabelsId, locale])
+  @@map("ui_label_translations")
+}
+
+model NavigationItem {
+  id           String                       @id @default(uuid())
+  href         String
+  sortOrder    Int                          @default(0) @map("sort_order")
+  isVisible    Boolean                      @default(true) @map("is_visible")
+  translations NavigationItemTranslation[]
+
+  @@index([sortOrder])
+  @@map("navigation_items")
+}
+
+model NavigationItemTranslation {
+  id               String         @id @default(uuid())
+  navigationItemId String         @map("navigation_item_id")
+  navigationItem   NavigationItem @relation(fields: [navigationItemId], references: [id], onDelete: Cascade)
+  locale           Locale
+  label            String         @default("")
+
+  @@unique([navigationItemId, locale])
+  @@map("navigation_item_translations")
+}
+
+// ---------------------------------------------------------------------------
+// Home
+// ---------------------------------------------------------------------------
+
+model HomePage {
+  id               String                   @id @default("default")
+  seoImageMediaId  String?                  @map("seo_image_media_id")
+  seoImageMedia    Media?                   @relation("HomeSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+  translations     HomePageTranslation[]
+  heroSlides       HeroSlide[]
+  introFeatures    HomeIntroFeature[]
+  whyItems         HomeWhyItem[]
+  featuredServices HomeFeaturedService[]
+  featuredProjects HomeFeaturedProject[]
+
+  @@map("home_page")
+}
+
+model HomePageTranslation {
+  id                    String   @id @default(uuid())
+  homePageId            String   @map("home_page_id")
+  homePage              HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  locale                Locale
+  heroTitle             String   @default("") @map("hero_title")
+  heroSubtitle          String   @default("") @map("hero_subtitle")
+  introEyebrow          String   @default("") @map("intro_eyebrow")
+  introTitle            String   @default("") @map("intro_title")
+  introDescription      String   @default("") @map("intro_description")
+  whyEyebrow            String   @default("") @map("why_eyebrow")
+  whyTitle              String   @default("") @map("why_title")
+  whySubtitle           String   @default("") @map("why_subtitle")
+  processEyebrow        String   @default("") @map("process_eyebrow")
+  processTitle          String   @default("") @map("process_title")
+  processSubtitle       String   @default("") @map("process_subtitle")
+  servicesEyebrow       String   @default("") @map("services_eyebrow")
+  servicesTitle         String   @default("") @map("services_title")
+  servicesSubtitle      String   @default("") @map("services_subtitle")
+  projectsEyebrow       String   @default("") @map("projects_eyebrow")
+  projectsTitle         String   @default("") @map("projects_title")
+  projectsSubtitle      String   @default("") @map("projects_subtitle")
+  materialsEyebrow      String   @default("") @map("materials_eyebrow")
+  materialsTitle        String   @default("") @map("materials_title")
+  materialsSubtitle     String   @default("") @map("materials_subtitle")
+  testimonialsEyebrow   String   @default("") @map("testimonials_eyebrow")
+  testimonialsTitle     String   @default("") @map("testimonials_title")
+  testimonialsSubtitle  String   @default("") @map("testimonials_subtitle")
+  ctaTitle              String   @default("") @map("cta_title")
+  ctaSubtitle           String   @default("") @map("cta_subtitle")
+  seoTitle              String   @default("") @map("seo_title")
+  seoDescription        String   @default("") @map("seo_description")
+
+  @@unique([homePageId, locale])
+  @@map("home_page_translations")
+}
+
+/// Ordered hero images. Existing SiteContent.home.heroImages is URL[] only —
+/// no per-slide copy, so hero_slide_translations is omitted.
+model HeroSlide {
+  id         String   @id @default(uuid())
+  homePageId String   @map("home_page_id")
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  mediaId    String   @map("media_id")
+  media      Media    @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  sortOrder  Int      @default(0) @map("sort_order")
+
+  @@index([homePageId, sortOrder])
+  @@map("hero_slides")
+}
+
+model HomeIntroFeature {
+  id           String                         @id @default(uuid())
+  homePageId   String                         @map("home_page_id")
+  homePage     HomePage                       @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  sortOrder    Int                            @default(0) @map("sort_order")
+  translations HomeIntroFeatureTranslation[]
+
+  @@index([homePageId, sortOrder])
+  @@map("home_intro_features")
+}
+
+model HomeIntroFeatureTranslation {
+  id        String           @id @default(uuid())
+  featureId String           @map("feature_id")
+  feature   HomeIntroFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  locale    Locale
+  title     String           @default("")
+  desc      String           @default("")
+
+  @@unique([featureId, locale])
+  @@map("home_intro_feature_translations")
+}
+
+model HomeWhyItem {
+  id           String                   @id @default(uuid())
+  homePageId   String                   @map("home_page_id")
+  homePage     HomePage                 @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  sortOrder    Int                      @default(0) @map("sort_order")
+  translations HomeWhyItemTranslation[]
+
+  @@index([homePageId, sortOrder])
+  @@map("home_why_items")
+}
+
+model HomeWhyItemTranslation {
+  id      String      @id @default(uuid())
+  itemId  String      @map("item_id")
+  item    HomeWhyItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale  Locale
+  title   String      @default("")
+  desc    String      @default("")
+
+  @@unique([itemId, locale])
+  @@map("home_why_item_translations")
+}
+
+model HomeFeaturedService {
+  id         String   @id @default(uuid())
+  homePageId String   @map("home_page_id")
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  serviceId  String   @map("service_id")
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  sortOrder  Int      @default(0) @map("sort_order")
+
+  @@unique([homePageId, serviceId])
+  @@index([homePageId, sortOrder])
+  @@map("home_featured_services")
+}
+
+model HomeFeaturedProject {
+  id         String   @id @default(uuid())
+  homePageId String   @map("home_page_id")
+  homePage   HomePage @relation(fields: [homePageId], references: [id], onDelete: Cascade)
+  projectId  String   @map("project_id")
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sortOrder  Int      @default(0) @map("sort_order")
+
+  @@unique([homePageId, projectId])
+  @@index([homePageId, sortOrder])
+  @@map("home_featured_projects")
+}
+
+// ---------------------------------------------------------------------------
+// Pages
+// ---------------------------------------------------------------------------
+
+model AboutPage {
+  id              String                  @id @default("default")
+  imageMediaId    String?                 @map("image_media_id")
+  imageMedia      Media?                  @relation("AboutImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                 @map("seo_image_media_id")
+  seoImageMedia   Media?                  @relation("AboutSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime                @updatedAt @map("updated_at")
+  translations    AboutPageTranslation[]
+  values          AboutValue[]
+
+  @@map("about_page")
+}
+
+model AboutPageTranslation {
+  id           String    @id @default(uuid())
+  aboutPageId  String    @map("about_page_id")
+  aboutPage    AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+  locale       Locale
+  eyebrow      String    @default("")
+  title        String    @default("")
+  subtitle     String    @default("")
+  body         String    @default("")
+  mission      String    @default("")
+  vision       String    @default("")
+  valuesTitle  String    @default("") @map("values_title")
+  seoTitle     String    @default("") @map("seo_title")
+  seoDescription String  @default("") @map("seo_description")
+
+  @@unique([aboutPageId, locale])
+  @@map("about_page_translations")
+}
+
+model AboutValue {
+  id           String                    @id @default(uuid())
+  aboutPageId  String                    @map("about_page_id")
+  aboutPage    AboutPage                 @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+  sortOrder    Int                       @default(0) @map("sort_order")
+  translations AboutValueTranslation[]
+
+  @@index([aboutPageId, sortOrder])
+  @@map("about_values")
+}
+
+model AboutValueTranslation {
+  id      String     @id @default(uuid())
+  valueId String     @map("value_id")
+  value   AboutValue @relation(fields: [valueId], references: [id], onDelete: Cascade)
+  locale  Locale
+  title   String     @default("")
+  desc    String     @default("")
+
+  @@unique([valueId, locale])
+  @@map("about_value_translations")
+}
+
+model HowWeWorkPage {
+  id              String                      @id @default("default")
+  imageMediaId    String?                     @map("image_media_id")
+  imageMedia      Media?                      @relation("HowWeWorkImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                     @map("seo_image_media_id")
+  seoImageMedia   Media?                      @relation("HowWeWorkSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime                    @updatedAt @map("updated_at")
+  translations    HowWeWorkPageTranslation[]
+  steps           HowWeWorkStep[]
+
+  @@map("how_we_work_page")
+}
+
+model HowWeWorkPageTranslation {
+  id              String        @id @default(uuid())
+  howWeWorkPageId String        @map("how_we_work_page_id")
+  howWeWorkPage   HowWeWorkPage @relation(fields: [howWeWorkPageId], references: [id], onDelete: Cascade)
+  locale          Locale
+  eyebrow         String        @default("")
+  title           String        @default("")
+  subtitle        String        @default("")
+  seoTitle        String        @default("") @map("seo_title")
+  seoDescription  String        @default("") @map("seo_description")
+
+  @@unique([howWeWorkPageId, locale])
+  @@map("how_we_work_page_translations")
+}
+
+model HowWeWorkStep {
+  id              String                       @id @default(uuid())
+  howWeWorkPageId String                       @map("how_we_work_page_id")
+  howWeWorkPage   HowWeWorkPage                @relation(fields: [howWeWorkPageId], references: [id], onDelete: Cascade)
+  number          String                       @default("")
+  sortOrder       Int                          @default(0) @map("sort_order")
+  imageMediaId    String?                      @map("image_media_id")
+  imageMedia      Media?                       @relation(fields: [imageMediaId], references: [id], onDelete: SetNull)
+  translations    HowWeWorkStepTranslation[]
+
+  @@index([howWeWorkPageId, sortOrder])
+  @@map("how_we_work_steps")
+}
+
+model HowWeWorkStepTranslation {
+  id          String        @id @default(uuid())
+  stepId      String        @map("step_id")
+  step        HowWeWorkStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  locale      Locale
+  title       String        @default("")
+  description String        @default("")
+
+  @@unique([stepId, locale])
+  @@map("how_we_work_step_translations")
+}
+
+model ContactPage {
+  id              String                    @id @default("default")
+  imageMediaId    String?                   @map("image_media_id")
+  imageMedia      Media?                    @relation("ContactImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                   @map("seo_image_media_id")
+  seoImageMedia   Media?                    @relation("ContactSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+  translations    ContactPageTranslation[]
+
+  @@map("contact_page")
+}
+
+model ContactPageTranslation {
+  id             String      @id @default(uuid())
+  contactPageId  String      @map("contact_page_id")
+  contactPage    ContactPage @relation(fields: [contactPageId], references: [id], onDelete: Cascade)
+  locale         Locale
+  eyebrow        String      @default("")
+  title          String      @default("")
+  subtitle       String      @default("")
+  seoTitle       String      @default("") @map("seo_title")
+  seoDescription String      @default("") @map("seo_description")
+
+  @@unique([contactPageId, locale])
+  @@map("contact_page_translations")
+}
+
+model FaqPage {
+  id              String                 @id @default("default")
+  imageMediaId    String?                @map("image_media_id")
+  imageMedia      Media?                 @relation("FaqImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                @map("seo_image_media_id")
+  seoImageMedia   Media?                 @relation("FaqSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  translations    FaqPageTranslation[]
+
+  @@map("faq_page")
+}
+
+model FaqPageTranslation {
+  id             String  @id @default(uuid())
+  faqPageId      String  @map("faq_page_id")
+  faqPage        FaqPage @relation(fields: [faqPageId], references: [id], onDelete: Cascade)
+  locale         Locale
+  eyebrow        String  @default("")
+  title          String  @default("")
+  subtitle       String  @default("")
+  seoTitle       String  @default("") @map("seo_title")
+  seoDescription String  @default("") @map("seo_description")
+
+  @@unique([faqPageId, locale])
+  @@map("faq_page_translations")
+}
+
+model BlogPage {
+  id              String                  @id @default("default")
+  imageMediaId    String?                 @map("image_media_id")
+  imageMedia      Media?                  @relation("BlogPageImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                 @map("seo_image_media_id")
+  seoImageMedia   Media?                  @relation("BlogPageSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  updatedAt       DateTime                @updatedAt @map("updated_at")
+  translations    BlogPageTranslation[]
+
+  @@map("blog_page")
+}
+
+model BlogPageTranslation {
+  id             String   @id @default(uuid())
+  blogPageId     String   @map("blog_page_id")
+  blogPage       BlogPage @relation(fields: [blogPageId], references: [id], onDelete: Cascade)
+  locale         Locale
+  eyebrow        String   @default("")
+  title          String   @default("")
+  subtitle       String   @default("")
+  seoTitle       String   @default("") @map("seo_title")
+  seoDescription String   @default("") @map("seo_description")
+
+  @@unique([blogPageId, locale])
+  @@map("blog_page_translations")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog — services (seven golden slugs are is_locked; no rows inserted here)
+// ---------------------------------------------------------------------------
+
+model Service {
+  id              String                 @id @default(uuid())
+  slug            String                 @unique
+  sortOrder       Int                    @default(0) @map("sort_order")
+  visible         Boolean                @default(true)
+  featured        Boolean                @default(false)
+  status          PublishStatus          @default(draft)
+  /// Golden seven: kitchens, bedrooms, wardrobes, walk-in-closets,
+  /// custom-furniture, offices, commercial. App + future DB trigger must
+  /// refuse DELETE and slug UPDATE when true. Do not insert those rows in Phase 1.
+  isLocked        Boolean                @default(false) @map("is_locked")
+  seoImageMediaId String?                @map("seo_image_media_id")
+  seoImageMedia   Media?                 @relation("ServiceSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  translations    ServiceTranslation[]
+  features        ServiceFeature[]
+  images          ServiceImage[]
+  featuredOnHome  HomeFeaturedService[]
+
+  @@index([visible, sortOrder])
+  @@index([isLocked])
+  @@map("services")
+}
+
+model ServiceTranslation {
+  id             String  @id @default(uuid())
+  serviceId      String  @map("service_id")
+  service        Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  locale         Locale
+  title          String  @default("")
+  description    String  @default("")
+  body           String  @default("")
+  seoTitle       String  @default("") @map("seo_title")
+  seoDescription String  @default("") @map("seo_description")
+
+  @@unique([serviceId, locale])
+  @@map("service_translations")
+}
+
+model ServiceFeature {
+  id           String                         @id @default(uuid())
+  serviceId    String                         @map("service_id")
+  service      Service                        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  sortOrder    Int                            @default(0) @map("sort_order")
+  translations ServiceFeatureTranslation[]
+
+  @@index([serviceId, sortOrder])
+  @@map("service_features")
+}
+
+model ServiceFeatureTranslation {
+  id        String         @id @default(uuid())
+  featureId String         @map("feature_id")
+  feature   ServiceFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  locale    Locale
+  title     String         @default("")
+
+  @@unique([featureId, locale])
+  @@map("service_feature_translations")
+}
+
+model ServiceImage {
+  id        String         @id @default(uuid())
+  serviceId String         @map("service_id")
+  service   Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  mediaId   String         @map("media_id")
+  media     Media          @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  placement MediaPlacement @default(gallery)
+  sortOrder Int            @default(0) @map("sort_order")
+
+  @@index([serviceId, placement, sortOrder])
+  @@map("service_images")
+}
+
+model Project {
+  id              String                  @id @default(uuid())
+  slug            String                  @unique
+  category        ProjectCategory
+  completedAt     DateTime?               @map("completed_at") @db.Date
+  sortOrder       Int                     @default(0) @map("sort_order")
+  visible         Boolean                 @default(true)
+  featured        Boolean                 @default(false)
+  status          PublishStatus           @default(draft)
+  seoImageMediaId String?                 @map("seo_image_media_id")
+  seoImageMedia   Media?                  @relation("ProjectSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @updatedAt @map("updated_at")
+  translations    ProjectTranslation[]
+  images          ProjectImage[]
+  materials       ProjectMaterial[]
+  featuredOnHome  HomeFeaturedProject[]
+
+  @@index([visible, category])
+  @@map("projects")
+}
+
+model ProjectTranslation {
+  id             String  @id @default(uuid())
+  projectId      String  @map("project_id")
+  project        Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  locale         Locale
+  title          String  @default("")
+  description    String  @default("")
+  location       String  @default("")
+  seoTitle       String  @default("") @map("seo_title")
+  seoDescription String  @default("") @map("seo_description")
+
+  @@unique([projectId, locale])
+  @@map("project_translations")
+}
+
+model ProjectImage {
+  id        String  @id @default(uuid())
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaId   String  @map("media_id")
+  media     Media   @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  sortOrder Int     @default(0) @map("sort_order")
+
+  @@index([projectId, sortOrder])
+  @@map("project_images")
+}
+
+model ProjectMaterial {
+  projectId  String   @map("project_id")
+  materialId String   @map("material_id")
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, materialId])
+  @@map("project_materials")
+}
+
+model Material {
+  id           String                  @id @default(uuid())
+  slug         String                  @unique
+  category     String?
+  sortOrder    Int                     @default(0) @map("sort_order")
+  visible      Boolean                 @default(true)
+  featured     Boolean                 @default(false)
+  status       PublishStatus           @default(draft)
+  imageMediaId String?                 @map("image_media_id")
+  imageMedia   Media?                  @relation("MaterialImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+  translations MaterialTranslation[]
+  projects     ProjectMaterial[]
+
+  @@index([visible, sortOrder])
+  @@map("materials")
+}
+
+model MaterialTranslation {
+  id               String   @id @default(uuid())
+  materialId       String   @map("material_id")
+  material         Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  locale           Locale
+  name             String   @default("")
+  description      String   @default("")
+  characteristics  String   @default("")
+  applications     String   @default("")
+  finishes         String   @default("")
+
+  @@unique([materialId, locale])
+  @@map("material_translations")
+}
+
+model Testimonial {
+  id           String                     @id @default(uuid())
+  /// Display name is not localized (matches current SiteContent / Sanity).
+  name         String
+  rating       Int                        @default(5)
+  sortOrder    Int                        @default(0) @map("sort_order")
+  visible      Boolean                    @default(true)
+  featured     Boolean                    @default(false)
+  status       PublishStatus              @default(draft)
+  imageMediaId String?                    @map("image_media_id")
+  imageMedia   Media?                     @relation("TestimonialImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  createdAt    DateTime                   @default(now()) @map("created_at")
+  updatedAt    DateTime                   @updatedAt @map("updated_at")
+  translations TestimonialTranslation[]
+
+  @@index([visible, sortOrder])
+  @@map("testimonials")
+}
+
+model TestimonialTranslation {
+  id            String      @id @default(uuid())
+  testimonialId String      @map("testimonial_id")
+  testimonial   Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+  locale        Locale
+  review        String      @default("")
+  project       String      @default("")
+
+  @@unique([testimonialId, locale])
+  @@map("testimonial_translations")
+}
+
+model FaqItem {
+  id           String                  @id @default(uuid())
+  category     String                  @default("")
+  sortOrder    Int                     @default(0) @map("sort_order")
+  visible      Boolean                 @default(true)
+  status       PublishStatus           @default(draft)
+  createdAt    DateTime                @default(now()) @map("created_at")
+  updatedAt    DateTime                @updatedAt @map("updated_at")
+  translations FaqItemTranslation[]
+
+  @@index([visible, sortOrder])
+  @@map("faq_items")
+}
+
+model FaqItemTranslation {
+  id        String  @id @default(uuid())
+  faqItemId String  @map("faq_item_id")
+  faqItem   FaqItem @relation(fields: [faqItemId], references: [id], onDelete: Cascade)
+  locale    Locale
+  question  String  @default("")
+  answer    String  @default("")
+
+  @@unique([faqItemId, locale])
+  @@map("faq_item_translations")
+}
+
+model BlogPost {
+  id              String                 @id @default(uuid())
+  slug            String                 @unique
+  category        String                 @default("")
+  author          String                 @default("Nora Group")
+  date            DateTime?              @db.Date
+  tags            String[]
+  visible         Boolean                @default(true)
+  featured        Boolean                @default(false)
+  status          PublishStatus          @default(draft)
+  imageMediaId    String?                @map("image_media_id")
+  imageMedia      Media?                 @relation("BlogPostImage", fields: [imageMediaId], references: [id], onDelete: SetNull)
+  seoImageMediaId String?                @map("seo_image_media_id")
+  seoImageMedia   Media?                 @relation("BlogPostSeoImage", fields: [seoImageMediaId], references: [id], onDelete: SetNull)
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  translations    BlogPostTranslation[]
+
+  @@index([visible, date])
+  @@map("blog_posts")
+}
+
+model BlogPostTranslation {
+  id             String   @id @default(uuid())
+  blogPostId     String   @map("blog_post_id")
+  blogPost       BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  locale         Locale
+  title          String   @default("")
+  excerpt        String   @default("")
+  content        String   @default("")
+  seoTitle       String   @default("") @map("seo_title")
+  seoDescription String   @default("") @map("seo_description")
+
+  @@unique([blogPostId, locale])
+  @@map("blog_post_translations")
+}
