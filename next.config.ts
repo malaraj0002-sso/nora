@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
-  serverExternalPackages: ['@sanity/vision'],
+  serverExternalPackages: ['@sanity/vision', '@node-rs/argon2'],
   async headers() {
     return [
       {

@@ -10,9 +10,15 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate"
+    "postinstall": "node scripts/prisma-generate.cjs",
+    "db:seed": "prisma db seed",
+    "test:auth": "tsx --conditions react-server scripts/phase-2-auth-verify.ts"
+  },
+  "prisma": {
+    "seed": "tsx --conditions react-server prisma/seed.ts"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.1",
     "@prisma/client": "^6.19.3",
     "@sanity/icons": "^3.7.0",
     "@sanity/image-url": "^1.1.0",
@@ -25,6 +31,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sanity": "^3.78.1",
+    "server-only": "^0.0.1",
     "styled-components": "^6.1.16"
   },
   "devDependencies": {
@@ -35,6 +42,7 @@
     "postcss": "^8.4.35",
     "prisma": "^6.19.3",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.13",
     "typescript": "^5.5.3"
   }
 }

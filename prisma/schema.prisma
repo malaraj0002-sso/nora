@@ -1,7 +1,8 @@
-// Nora Group — PostgreSQL schema (Phase 1 foundations).
+// Nora Group — PostgreSQL schema.
 //
-// NOT APPLIED. No migrate, no production connection, no seed data.
-// Public website continues to read Sanity via getSiteContent().
+// Phase 2 applies AUTH tables + empty content tables to local/staging only.
+// Never migrate production from this phase. Never insert CMS/content rows here.
+// Public website continues to read Sanity via getSiteContent() (CONTENT_SOURCE=sanity).
 //
 // This file models the future CMS so it can map 1:1 onto SiteContent
 // (lib/content/types.ts). Legal pages and the lazaCore "madeBy" string stay in code.
@@ -142,12 +143,15 @@ model AuditLog {
   action     String
   entityType String   @map("entity_type")
   entityId   String?  @map("entity_id")
+  /// JSON metadata. Application layer strips passwords, tokens, and secrets.
   metadata   Json?
   ip         String?
+  userAgent  String?  @map("user_agent")
   createdAt  DateTime @default(now()) @map("created_at")
 
-  @@index([createdAt])
+  @@index([createdAt(sort: Desc)])
   @@index([entityType, entityId])
+  @@index([actorId])
   @@map("audit_logs")
 }
 
